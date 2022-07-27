@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+
 from .models import UserAccount
 from django.contrib.auth.models import User
 
@@ -31,12 +33,6 @@ class UserAccountCreateSerializer(serializers.ModelSerializer):
         return  useraccount
 
 
-
-    #
-    # def validate_password(self, password, user=None):
-    #     if len(password) < self.min_length:
-    #         raise ValidationError(
-    #             _("This password must contain at least %(min_length)d characters."),
-    #             code='password_too_short',
-    #             params={'min_length': self.min_length},
-    #         )
+    def validate_password(self, password):
+        if len(password) < 7:
+            raise ValidationError("This password must contain at least 7 characters.")
