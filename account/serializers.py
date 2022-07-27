@@ -7,15 +7,24 @@ from django.contrib.auth.models import User
 class UserAccountCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True,
         style={'input_type': 'password'})
-    # password = serializers.SerializerMethodField(read_only=True)
+    password2 = serializers.CharField(write_only=True, required=True,
+                                      style={'input_type': 'password'})
 
     class Meta:
         model = UserAccount
-        fields = ('name', 'password',  'profile_picture', 'email', 'birth_date', 'bio')
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ('name', 'password','password2',  'profile_picture', 'email', 'birth_date', 'bio')
+        extra_kwargs = {'password': {'write_only': True}, 'password2': {'write_only': True}}
 
-    def get_password(self, password):
-        return password
+
+
+    def validate(self, attr):
+        print(attr)
+        if attr['password'] != attr['password2']:
+            raise ValidationError("password must match.")
+        if len(attr['password']) < 7:
+            raise ValidationError("This password must contain at least 7 characters.")
+        return attr
+
 
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -33,6 +42,3 @@ class UserAccountCreateSerializer(serializers.ModelSerializer):
         return  useraccount
 
 
-    def validate_password(self, password):
-        if len(password) < 7:
-            raise ValidationError("This password must contain at least 7 characters.")
