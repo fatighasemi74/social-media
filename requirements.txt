@@ -5,6 +5,7 @@ django-filter==22.1
 djangorestframework==3.13.1
 djangorestframework-simplejwt==5.2.0
 filelock==3.7.1
+gunicorn==20.1.0
 importlib-metadata==4.12.0
 Markdown==3.4.1
 Pillow==9.2.0
@@ -14,4 +15,5 @@ pytz==2022.1
 six==1.16.0
 sqlparse==0.4.2
 virtualenv==20.14.1
+whitenoise==6.2.0
 zipp==3.8.1
