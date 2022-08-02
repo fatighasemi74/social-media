@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-#n%2h3=6hd_6j!qdor^za*2g=qh=7k2q#2vb5b)snw7hfud65u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['social-mediaaaa.herokuapp.com', '127.0.0.1', '*']
+ALLOWED_HOSTS = ['social-mediaaaa.herokuapp.com', '127.0.0.1']
 
 
 # Application definition
@@ -67,7 +67,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOW_ALL_ORIGINS: True
+CORS_ALLOWED_ORIGINS = [
+    "https://social-mediaaaa.herokuapp.com",
+    "http://localhost:8080",
+    "http://127.0.0.1:9000",
+]
 
 CORS_ALLOW_HEADERS = [
     'accept',
