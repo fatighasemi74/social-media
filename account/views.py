@@ -20,15 +20,35 @@ class MyTokenObtainPairView(TokenObtainPairView):
 class UserCreateAPIView(CreateAPIView):
     serializer_class = UserAccountCreateSerializer
 
+    def post(self, request, *args, **kwargs):
+        try:
+            user = self.create(request, *args, **kwargs)
+            content = {'message': 'created succesfully!'}
+            return Response(content, status=status.HTTP_200_OK)
+        except Exception as e:
+            content = {'message': 'user already exist'}
+            return Response(content, status=status.HTTP_201_CREATED)
 
-    # def get_tokens_for_user(user):
-    #     refresh = RefreshToken.for_user(user)
-    #     print(refresh)
-    #     return {
-    #         'refresh': str(refresh),
-    #         'access': str(refresh.access_token),
-    #     }
-    #
+
+
+
+    # def create(self, request, *args, **kwargs):
+    #     response = super().create(request, *args, **kwargs)
+        # serializer = UserAccountCreateSerializer(data=request.data)
+        # if serializer.is_valid():
+        #     serializer.save()
+        #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # content = {'message': 'created succesfully!'}
+        # return Response(content, status=status.HTTP_200_OK)
+
+        # return Response({
+        #     'status': 200,
+        #     'message': 'Testimonials fetched',
+        #     'data': response.data
+        # })
+
+
 
 class LogoutView(APIView):
     permission_classes = (IsAuthenticated,)
