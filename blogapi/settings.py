@@ -86,6 +86,9 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
+CORS_ALLOW_CREDENTIALS = True
+
+
 ROOT_URLCONF = 'blogapi.urls'
 
 TEMPLATES = [
@@ -171,7 +174,9 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication'
+        'rest_framework.authentication.SessionAuthentication',
+        'account.authenticate.CustomAuthentication',
+
     ] if DEBUG else {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     },
@@ -186,8 +191,8 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=90),
-    'ROTATE_REFRESH_TOKENS': True,
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': False,
 
