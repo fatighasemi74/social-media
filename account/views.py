@@ -38,7 +38,7 @@ class LoginView(APIView):
                 data = get_tokens_for_user(user)
                 response.set_cookie(
                     key = settings.SIMPLE_JWT['AUTH_COOKIE'],
-                    value = data["access"],
+                    value = data["refresh"],
                     expires = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
                     secure = settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
                     httponly = settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
