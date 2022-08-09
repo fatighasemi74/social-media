@@ -30,12 +30,11 @@ class LoginView(APIView):
         username = data.get('username', None)
         password = data.get('password', None)
         user = authenticate(username=username, password=password)
-        print(response)
+        # print(response)
 
         if user is not None:
             if user.is_active:
                 data = get_tokens_for_user(user)
-                # print(data)
                 response.set_cookie(
                     key = settings.SIMPLE_JWT['AUTH_COOKIE'],
                     value = data["access"],
@@ -44,9 +43,12 @@ class LoginView(APIView):
                     httponly = settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
                     samesite = settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
                 )
-                print(request.COOKIES)
+                # print(request.COOKIES)
                 csrf.get_token(request)
-                response.data = {"Success" : "Login successfully","data":data}
+                # data = data['access']
+                # print(data)
+
+                response.data = {"Success" : "Login successfully","data":data['access']}
                 return response
             else:
                 return Response({"No active" : "This account is not active!!"}, status=status.HTTP_404_NOT_FOUND)
