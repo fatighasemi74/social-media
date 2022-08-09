@@ -1,9 +1,7 @@
-from django.shortcuts import render
-from rest_framework.generics import  CreateAPIView,GenericAPIView, RetrieveUpdateAPIView, UpdateAPIView
+from rest_framework.generics import  CreateAPIView
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.middleware import csrf
@@ -12,7 +10,6 @@ from django.conf import settings
 from rest_framework import status
 
 
-from .models import UserAccount
 
 from .serializers import UserAccountCreateSerializer, MyTokenObtainPairSerializer
 
@@ -33,17 +30,21 @@ class LoginView(APIView):
         username = data.get('username', None)
         password = data.get('password', None)
         user = authenticate(username=username, password=password)
+        print(response)
+
         if user is not None:
             if user.is_active:
                 data = get_tokens_for_user(user)
+                # print(data)
                 response.set_cookie(
                     key = settings.SIMPLE_JWT['AUTH_COOKIE'],
-                    value = data["refresh"],
+                    value = data["access"],
                     expires = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
                     secure = settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
                     httponly = settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
                     samesite = settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
                 )
+                print(request.COOKIES)
                 csrf.get_token(request)
                 response.data = {"Success" : "Login successfully","data":data}
                 return response
@@ -91,12 +92,14 @@ class UserCreateAPIView(CreateAPIView):
 
 class LogoutView(APIView):
     permission_classes = (IsAuthenticated,)
+    # print('log out')
 
     def post(self, request):
         try:
             refresh_token = request.data["refresh_token"]
             token = RefreshToken(refresh_token)
             token.blacklist()
+            print('log out')
 
             return Response(status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
