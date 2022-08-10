@@ -2,6 +2,9 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+from django.contrib.auth.hashers import make_password
+
+
 from .models import UserAccount
 from django.contrib.auth.models import User
 
@@ -59,3 +62,65 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserAccount
         fields = ('name', 'profile_picture', 'birth_date', 'bio')
+
+
+class EditProfileSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True)
+
+    class Meta:
+        model = UserAccount
+        fields = ('name', 'email',  'profile_picture', 'birth_date', 'bio')
+
+    def validate_email(self, value):
+        user = self.context['request'].user
+        if User.objects.exclude(pk=user.pk).filter(email=value).exists():
+            raise serializers.ValidationError({"email": "This email is already in use."})
+        return value
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data['name']
+        instance.email = validated_data['email']
+        instance.profile_picture = validated_data['profile_picture']
+        instance.birth_date = validated_data['birth_date']
+        instance.bio = validated_data['bio']
+
+        instance.save()
+
+        return instance
+
+
+
+class ChangePasswordSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True,
+        style={'input_type': 'password'})
+    password2 = serializers.CharField(write_only=True, required=True,
+                                      style={'input_type': 'password'})
+    old_password = serializers.CharField(write_only=True, required=True,
+                                         style={'input_type': 'password'})
+
+    class Meta:
+        model = User
+        fields = ('old_password', 'password', 'password2')
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError({"password": "Password fields didn't match."})
+        return attrs
+
+    def validate_old_password(self, value):
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise serializers.ValidationError({"old_password": "Old password is not correct"})
+        return value
+
+
+    def update(self, instance,validated_data):
+        password = validated_data['password']
+        user = User.objects.filter(username=self.instance)
+
+        print(password)
+        for u in user:
+            u.set_password(password)
+            u.save()
+
+        return u

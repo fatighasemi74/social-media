@@ -3,7 +3,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, \
     TokenRefreshView, TokenVerifyView
 
 
-from .views import UserCreateAPIView, LogoutView, LoginView, ProfileViewSet
+from .views import UserCreateAPIView, LogoutView, LoginView, ProfileViewSet, EditProfileView, ChangePasswordView
 
 urlpatterns = [
     path('create/', UserCreateAPIView.as_view(), name='account-create'),
@@ -14,4 +14,7 @@ urlpatterns = [
     path('verify-token/', TokenVerifyView.as_view(), name='token_verify'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('profile/<int:pk>/', ProfileViewSet.as_view({'get': 'get_queryset'}), name='profile'),
+    path('edit_profile/<int:pk>', EditProfileView.as_view(), name='edit-profile'),
+    path('change_password/<int:pk>/', ChangePasswordView.as_view(), name='change_password'),
+
 ]
