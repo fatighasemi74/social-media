@@ -7,11 +7,15 @@ from rest_framework.response import Response
 from django.middleware import csrf
 from django.contrib.auth import authenticate
 from django.conf import settings
-from rest_framework import status
+from rest_framework import viewsets
+from rest_framework import status, generics
+from django.shortcuts import get_object_or_404
 
 
 
-from .serializers import UserAccountCreateSerializer, MyTokenObtainPairSerializer
+
+from .models import UserAccount
+from .serializers import UserAccountCreateSerializer, MyTokenObtainPairSerializer, ProfileSerializer
 
 
 
@@ -56,8 +60,8 @@ class LoginView(APIView):
         else:
             return Response({"Invalid" : "Invalid username or password!!"}, status=status.HTTP_404_NOT_FOUND)
 
-class MyTokenObtainPairView(TokenObtainPairView):
-    serializer_class = MyTokenObtainPairSerializer
+# class MyTokenObtainPairView(TokenObtainPairView):
+#     serializer_class = MyTokenObtainPairSerializer
 
 
 class UserCreateAPIView(CreateAPIView):
@@ -109,3 +113,47 @@ class LogoutView(APIView):
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
+
+# class UserProfileView(generics.RetrieveAPIView):
+#
+#     permission_classes = (IsAuthenticated,)
+#
+#
+#
+#     def get(self, request, pk, *args, **kwargs):
+#         try:
+#             user_profile = UserAccount.objects.filter(id=pk)
+#             print(user_profile)
+#             status_code = status.HTTP_200_OK
+#             response = {
+#                 'success': 'true',
+#                 'status code': status_code,
+#                 'message': 'User profile fetched successfully',
+#                 'data': [{
+#                     'name': user_profile.username,
+#                     # 'bio': user_profile.bio,
+#                     # 'email': user_profile.email,
+#                     # 'birth_date': user_profile.birth_date,
+#                     # 'profile_picture': user_profile.profile_picture,
+#                     }]
+#                 }
+#             return Response(response, status=status_code)
+#         except Exception as e:
+#             status_code = status.HTTP_400_BAD_REQUEST
+#             response = {
+#                 'success': 'false',
+#                 'status code': status.HTTP_400_BAD_REQUEST,
+#                 'message': 'User does not exists',
+#                 'error': str(e)
+#                 }
+#         return Response(response, status=status_code)
+
+class ProfileViewSet(viewsets.ViewSet):
+    serializer_class = ProfileSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self, request, pk=None):
+        queryset = UserAccount.objects.all()
+        user = get_object_or_404(queryset, pk=pk)
+        serializer = ProfileSerializer(user)
+        return Response(serializer.data)

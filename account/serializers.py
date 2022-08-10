@@ -55,4 +55,7 @@ class UserAccountCreateSerializer(serializers.ModelSerializer):
         useraccount.save()
         return  useraccount
 
-
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserAccount
+        fields = ('name', 'profile_picture', 'birth_date', 'bio')
