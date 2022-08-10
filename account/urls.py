@@ -13,8 +13,8 @@ urlpatterns = [
     path('refresh-token/', TokenRefreshView.as_view(), name='token_refresh'),
     path('verify-token/', TokenVerifyView.as_view(), name='token_verify'),
     path('logout/', LogoutView.as_view(), name='logout'),
-    path('profile/<int:pk>/', ProfileViewSet.as_view({'get': 'get_queryset'}), name='profile'),
-    path('edit_profile/<int:pk>', EditProfileView.as_view(), name='edit-profile'),
+    path('profile/<str:username>/', ProfileViewSet.as_view({'get': 'get_queryset'}), name='profile'),
+    path('edit_profile/<str:username>/', EditProfileView.as_view(), name='edit-profile'),
     path('change_password/<int:pk>/', ChangePasswordView.as_view(), name='change_password'),
 
 ]

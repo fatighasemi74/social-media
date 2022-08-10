@@ -98,19 +98,20 @@ class ProfileViewSet(viewsets.ViewSet):
     serializer_class = ProfileSerializer
     permission_classes = (IsAuthenticated,)
 
-    def get_queryset(self, request, pk=None):
+    def get_queryset(self, request, username, *args, **kwargs):
         queryset = UserAccount.objects.all()
-        user = get_object_or_404(queryset, pk=pk)
+        user = get_object_or_404(queryset, **{'name':username})
         serializer = ProfileSerializer(user)
         return Response(serializer.data)
+
 
 class EditProfileView(generics.UpdateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = EditProfileSerializer
 
-    def get_queryset(self, request, pk=None):
+    def get_queryset(self, request, username, *args, **kwargs):
         queryset = UserAccount.objects.all()
-        user = get_object_or_404(queryset, pk=pk)
+        user = get_object_or_404(queryset, **{'name':username})
         serializer = EditProfileSerializer(user)
         return Response(serializer.data)
 
