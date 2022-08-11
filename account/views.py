@@ -108,6 +108,7 @@ class ProfileViewSet(viewsets.ViewSet):
     def get_queryset(self, request, username, *args, **kwargs):
         queryset = UserAccount.objects.all()
         user = get_object_or_404(queryset, **{'name':username})
+        print(user)
         serializer = ProfileSerializer(user)
         return Response(serializer.data)
 
@@ -115,12 +116,21 @@ class ProfileViewSet(viewsets.ViewSet):
 class EditProfileView(generics.UpdateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = EditProfileSerializer
+    queryset = UserAccount.objects.all()
 
-    def get_queryset(self, request, username, *args, **kwargs):
-        queryset = UserAccount.objects.all()
-        user = get_object_or_404(queryset, **{'name':username})
-        serializer = EditProfileSerializer(user)
-        return Response(serializer.data)
+    # def put(self, request, *args, **kwargs):
+    #     queryset = UserAccount.objects.all()
+    #     user = get_object_or_404(queryset)
+    #     serializer = EditProfileSerializer(user)
+    #     print(serializer.data)
+    #     return self.update(request, *args, **kwargs)
+
+    # def get_queryset(self, request, username, *args, **kwargs):
+    #     queryset = UserAccount.objects.all()
+    #     user = get_object_or_404(queryset, **{'name':username})
+    #     # user = get_object_or_404(queryset, name=self.kwargs['username'])
+    #     serializer = EditProfileSerializer(user)
+    #     return Response(serializer.data)
 
 
 class ChangePasswordView(generics.UpdateAPIView):

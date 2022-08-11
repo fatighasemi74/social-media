@@ -65,7 +65,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class EditProfileSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(required=True)
+    # email = serializers.EmailField(required=False)
 
     class Meta:
         model = UserAccount
@@ -78,11 +78,17 @@ class EditProfileSerializer(serializers.ModelSerializer):
         return value
 
     def update(self, instance, validated_data):
-        instance.name = validated_data['name']
-        instance.email = validated_data['email']
-        instance.profile_picture = validated_data['profile_picture']
-        instance.birth_date = validated_data['birth_date']
-        instance.bio = validated_data['bio']
+
+        if validated_data['name']:
+            instance.name = validated_data['name']
+        if validated_data['email']:
+            instance.email = validated_data['email']
+        if validated_data['profile_picture']:
+            instance.profile_picture = validated_data['profile_picture']
+        if validated_data['birth_date']:
+            instance.birth_date = validated_data['birth_date']
+        if validated_data['bio']:
+            instance.bio = validated_data['bio']
 
         instance.save()
 
@@ -118,7 +124,7 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
         password = validated_data['password']
         user = User.objects.filter(username=self.instance)
 
-        print(password)
+        # print(password)
         for u in user:
             u.set_password(password)
             u.save()
