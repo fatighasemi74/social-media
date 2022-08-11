@@ -28,6 +28,8 @@ def get_tokens_for_user(user):
         'access': str(refresh.access_token),
     }
 
+
+
 class LoginView(APIView):
 
     def post(self, request, format=None):
@@ -39,7 +41,12 @@ class LoginView(APIView):
 
         if user is not None:
             if user.is_active:
+                username = data.get('username', None)
+                # print(username)
                 data = get_tokens_for_user(user)
+                data['username'] = username
+
+                # print(data)
                 response.set_cookie(
                     key = settings.SIMPLE_JWT['AUTH_COOKIE'],
                     value = data["access"],
@@ -51,7 +58,7 @@ class LoginView(APIView):
                 csrf.get_token(request)
 
 
-                response.data = {"Success" : "Login successfully","data":data['access']}
+                response.data = {"Success" : "Login successfully","data":data['access'], "username": data["username"]}
                 return response
             else:
                 return Response({"No active" : "This account is not active!!"}, status=status.HTTP_404_NOT_FOUND)
