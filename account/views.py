@@ -42,11 +42,9 @@ class LoginView(APIView):
         if user is not None:
             if user.is_active:
                 username = data.get('username', None)
-                # print(username)
                 data = get_tokens_for_user(user)
                 data['username'] = username
 
-                # print(data)
                 response.set_cookie(
                     key = settings.SIMPLE_JWT['AUTH_COOKIE'],
                     value = data["access"],
@@ -65,8 +63,8 @@ class LoginView(APIView):
         else:
             return Response({"Invalid" : "Invalid username or password!!"}, status=status.HTTP_404_NOT_FOUND)
 
-# class MyTokenObtainPairView(TokenObtainPairView):
-#     serializer_class = MyTokenObtainPairSerializer
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
 
 
 class UserCreateAPIView(CreateAPIView):
@@ -93,6 +91,7 @@ class LogoutView(APIView):
             refresh_token = request.data.get("refresh_token")
             token = RefreshToken(refresh_token)
             token.blacklist()
+            token.delete_cookie
 
             return Response(status=status.HTTP_200_OK)
         except Exception as e:
