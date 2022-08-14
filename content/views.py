@@ -25,6 +25,15 @@ class PostListAPIView(generics.ListAPIView):
     serializer_class = PostListSerializer
     permission_classes = (IsAuthenticated, )
 
+class AuthorPostListAPIView(generics.ListAPIView):
+    serializer_class = PostListSerializer
+    permission_classes = (IsAuthenticated, )
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(name__startswith=self.kwargs['name'])
+
+
 class PostDetailAPIView(APIView):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly )
 

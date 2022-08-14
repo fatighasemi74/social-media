@@ -1,17 +1,20 @@
 from rest_framework.generics import  CreateAPIView
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken , AccessToken
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.middleware import csrf
 from django.contrib.auth import authenticate
 from django.conf import settings
+from django.contrib.auth import logout
 from rest_framework import viewsets
 from rest_framework import status, generics
 from django.shortcuts import get_object_or_404
 
+from django.contrib.auth.models import User
 
+import jwt
 
 
 from .models import UserAccount
@@ -28,6 +31,24 @@ def get_tokens_for_user(user):
         'access': str(refresh.access_token),
     }
 
+def refresh_token_for_user(user):
+    refresh = RefreshToken.for_user(user)
+    return {
+        'access': str(refresh.access_token),
+    }
+
+class RefreshTokenAPIView(APIView):
+
+    def post(self, request):
+        refresh = self.request.COOKIES.get('refresh_token')
+        response = Response()
+        decode = jwt.decode(refresh,settings.SECRET_KEY, algorithms=['HS256'])
+        user_id = decode['user_id']
+        user = User.objects.filter(id=user_id).first()
+        data = test(user)
+
+        print(data['access'])
+        return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(APIView):
@@ -44,18 +65,16 @@ class LoginView(APIView):
                 username = data.get('username', None)
                 data = get_tokens_for_user(user)
                 data['username'] = username
-
+                # print(data['refresh'])
                 response.set_cookie(
                     key = settings.SIMPLE_JWT['AUTH_COOKIE'],
-                    value = data["access"],
+                    value = data["refresh"],
                     expires = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
                     secure = settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
                     httponly = settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
                     samesite = settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
                 )
-                csrf.get_token(request)
-
-
+                # csrf.get_token(request)
                 response.data = {"Success" : "Login successfully","data":data['access'], "username": data["username"]}
                 return response
             else:
@@ -88,12 +107,15 @@ class LogoutView(APIView):
 
     def post(self, request):
         try:
+            response = Response()
+            response.delete_cookie('refresh_token')
+            # response.delete_cookie('csrftoken')
+            print(response)
             refresh_token = request.data.get("refresh_token")
             token = RefreshToken(refresh_token)
             token.blacklist()
-            token.delete_cookie
 
-            return Response(status=status.HTTP_200_OK)
+            return Response(response, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 

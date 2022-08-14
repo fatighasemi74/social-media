@@ -180,7 +180,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-        'account.authenticate.CustomAuthentication',
+        # 'account.authenticate.CustomAuthentication',
 
     ] if DEBUG else {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -227,7 +227,7 @@ SIMPLE_JWT = {
 
     'AUTH_COOKIE': 'refresh_token',
     'AUTH_COOKIE_DOMAIN': None,
-    'AUTH_COOKIE_SECURE': True,
+    'AUTH_COOKIE_SECURE': False,
     'AUTH_COOKIE_HTTP_ONLY': True,
     'AUTH_COOKIE_PATH': '/',
     'AUTH_COOKIE_SAMESITE': 'None',

@@ -9,7 +9,7 @@ class UserAccount(models.Model):
     name = models.CharField(max_length=200, null=True, blank=True)
     profile_picture = models.ImageField(upload_to='account/media', null=True, blank=True,  height_field=None, width_field=None, max_length=100)
     bio = models.TextField(blank=True, null= True)
-    email = models.EmailField(max_length=254)
+    email = models.EmailField(max_length=254, unique=True, null=True, blank=True)
     birth_date = models.DateField(null=True, blank=True)
 
     class Meta:

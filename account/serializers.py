@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
+from rest_framework_simplejwt.exceptions import InvalidToken
 
 from django.contrib.auth.hashers import make_password
 
@@ -14,19 +15,21 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-
+        print(token)
 
         token['username'] = user.username
-
-
-
         return token
+
+
+
+
 
 class UserAccountCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True,
         style={'input_type': 'password'})
     password2 = serializers.CharField(write_only=True, required=True,
                                       style={'input_type': 'password'})
+
 
     class Meta:
         model = UserAccount
@@ -41,6 +44,17 @@ class UserAccountCreateSerializer(serializers.ModelSerializer):
         if len(attr['password']) < 7:
             raise ValidationError("This password must contain at least 7 characters.")
         return attr
+
+    # def clean(self):
+    #     # cleaned_data = super().clean()
+    #     # email = cleaned_data.get('email')
+    #     email = self.cleaned_data.get('email')
+    #
+    #     print(email)
+    #     if User.objects.filter(email=email).exists():
+    #         print('errorrrrrr')
+    #         raise ValidationError("Email exists")
+    #     return self.cleaned_data
 
 
     def create(self, validated_data):
