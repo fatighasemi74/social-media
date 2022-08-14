@@ -45,7 +45,7 @@ class RefreshTokenAPIView(APIView):
         decode = jwt.decode(refresh,settings.SECRET_KEY, algorithms=['HS256'])
         user_id = decode['user_id']
         user = User.objects.filter(id=user_id).first()
-        data = test(user)
+        data = refresh_token_for_user(user)
 
         print(data['access'])
         return Response(data, status=status.HTTP_400_BAD_REQUEST)
