@@ -79,24 +79,17 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class EditProfileSerializer(serializers.ModelSerializer):
-    # email = serializers.EmailField(required=False)
 
     class Meta:
         model = UserAccount
-        fields = ('name', 'email',  'profile_picture', 'birth_date', 'bio')
+        fields = ('name',  'profile_picture', 'birth_date', 'bio')
 
-    def validate_email(self, value):
-        user = self.context['request'].user
-        if User.objects.exclude(pk=user.pk).filter(email=value).exists():
-            raise serializers.ValidationError({"email": "This email is already in use."})
-        return value
+
 
     def update(self, instance, validated_data):
 
         if validated_data['name']:
             instance.name = validated_data['name']
-        if validated_data['email']:
-            instance.email = validated_data['email']
         if validated_data['profile_picture']:
             instance.profile_picture = validated_data['profile_picture']
         if validated_data['birth_date']:
