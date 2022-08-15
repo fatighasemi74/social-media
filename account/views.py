@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 
 import jwt
 
-
+from .tokens import GenerateToken
 from .models import UserAccount
 from .serializers import UserAccountCreateSerializer, MyTokenObtainPairSerializer,\
     ProfileSerializer, EditProfileSerializer, ChangePasswordSerializer
@@ -108,14 +108,14 @@ class LogoutView(APIView):
     def post(self, request):
         try:
             response = Response()
-            response.delete_cookie('refresh_token')
-            # response.delete_cookie('csrftoken')
-            print(response)
             refresh_token = request.data.get("refresh_token")
             token = RefreshToken(refresh_token)
             token.blacklist()
+            for cookie in request.COOKIES:
+                response.delete_cookie(cookie)
+            return response
 
-            return Response(response, status=status.HTTP_200_OK)
+            # return Response(status=status.HTTP_200_OK)
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
