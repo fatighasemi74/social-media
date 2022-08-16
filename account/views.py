@@ -18,7 +18,7 @@ import jwt
 
 from .models import UserAccount
 from .serializers import UserAccountCreateSerializer, MyTokenObtainPairSerializer,\
-    ProfileSerializer, EditProfileSerializer, ChangePasswordSerializer
+    ProfileSerializer, EditProfileSerializer, ChangePasswordSerializer, DeleteUserSerializer
 from content.models import Post
 
 
@@ -26,6 +26,7 @@ from content.models import Post
 #new functions:
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
+    refresh['user'] = str(user)
     return {
         'refresh': str(refresh),
         'access': str(refresh.access_token),
@@ -75,6 +76,7 @@ class LoginView(APIView):
                     samesite = settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
                 )
                 csrf.get_token(request)
+                # print(data['access'])
                 response.data = {"Success" : "Login successfully","data":data['access'], "username": data["username"]}
                 return response
             else:
@@ -169,8 +171,8 @@ class ChangePasswordView(generics.UpdateAPIView):
         queryset = UserAccount.objects.all()
         log_in = UserAccount.objects.get(username=request.user)
         user = get_object_or_404(queryset, **{'pk': pk})
-        print(log_in)
-        print(user)
+        # print(log_in)
+        # print(user)
         if user == log_in:
             serializer = EditProfileSerializer(user)
             return self.update(request, *args, **kwargs)
@@ -178,3 +180,20 @@ class ChangePasswordView(generics.UpdateAPIView):
             content = {'message': 'you dont have the permission'}
             return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
+
+class DeletePosAPIView(generics.DestroyAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = DeleteUserSerializer
+    queryset = UserAccount.objects.all()
+
+    def delete(self, request, pk, *args, **kwargs):
+        queryset = User.objects.all()
+        log_in = User.objects.get(username=request.user)
+        user = get_object_or_404(queryset, **{'pk': pk})
+        print(log_in)
+        print(user)
+        if user == log_in:
+            return self.destroy(request, *args, **kwargs)
+        else:
+            content = {'message': 'you cant delete'}
+            return Response(content,status=status.HTTP_400_BAD_REQUEST)

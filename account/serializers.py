@@ -138,3 +138,8 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
             u.save()
 
         return u
+
+class DeleteUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = "__all__"
