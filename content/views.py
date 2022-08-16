@@ -4,12 +4,15 @@ from rest_framework import status, generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from rest_framework import viewsets
 
 
 
 from content.permissions import IsOwnerOrReadOnly
 from content.models import Post
-from content.serializers import PostListSerializer, PostDetailSerializer
+from content.serializers import PostListSerializer, PostDetailSerializer, EditPostSerializer
+
+from account.models import UserAccount
 
 
 class PostCreateAPIView(generics.CreateAPIView):
@@ -25,13 +28,25 @@ class PostListAPIView(generics.ListAPIView):
     serializer_class = PostListSerializer
     permission_classes = (IsAuthenticated, )
 
-class AuthorPostListAPIView(generics.ListAPIView):
-    serializer_class = PostListSerializer
+
+class AuthorPostListAPIView(APIView):
     permission_classes = (IsAuthenticated, )
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        return queryset.filter(name__startswith=self.kwargs['name'])
+    def get(self, request, *args, **kwargs):
+        username = self.kwargs['username']
+        print('hiiiiiiiiiiiiiiii' , username)
+
+
+        posts = Post.objects.filter(user=username.id)
+        print(posts)
+        postSerializer = PostListSerializer(posts, many=True)
+        print(postSerializer)
+        if postSerializer.is_valid():
+            postSerializer.save()
+        print(postSerializer.data)
+        return queryset
+
+
 
 
 class PostDetailAPIView(APIView):
@@ -41,9 +56,20 @@ class PostDetailAPIView(APIView):
         instance = get_object_or_404(Post, **{'pk':pk})
         serializer = PostDetailSerializer(instance)
         return Response(serializer.data)
+
     
-class PostEditAPIView(generics.RetrieveUpdateAPIView):
-    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly, )
+class PostEditAPIView(generics.UpdateAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = EditPostSerializer
+    queryset = Post.objects.all()
+
+
+    def put(self, request, pk, *args, **kwargs):
+        post = get_object_or_404(Post, **{'pk': pk})
+        serializer = EditPostSerializer(post)
+        print(serializer.data)
+        return self.update(request, *args, **kwargs)
+
 
 
 

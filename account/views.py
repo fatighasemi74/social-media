@@ -16,10 +16,10 @@ from django.contrib.auth.models import User
 
 import jwt
 
-from .tokens import GenerateToken
 from .models import UserAccount
 from .serializers import UserAccountCreateSerializer, MyTokenObtainPairSerializer,\
     ProfileSerializer, EditProfileSerializer, ChangePasswordSerializer
+from content.models import Post
 
 
 
@@ -31,11 +31,11 @@ def get_tokens_for_user(user):
         'access': str(refresh.access_token),
     }
 
-# def refresh_token_for_user(user):
-#     refresh = RefreshToken.for_user(user)
-#     return {
-#         'access': str(refresh.access_token),
-#     }
+def refresh_token_for_user(user):
+    refresh = RefreshToken.for_user(user)
+    return {
+        'access': str(refresh.access_token),
+    }
 
 class RefreshTokenAPIView(APIView):
 
@@ -45,7 +45,7 @@ class RefreshTokenAPIView(APIView):
         decode = jwt.decode(refresh,settings.SECRET_KEY, algorithms=['HS256'])
         user_id = decode['user_id']
         user = User.objects.filter(id=user_id).first()
-        data = get_tokens_for_user(user)
+        data = refresh_token_for_user(user)
 
         print(data['access'])
         return Response(data, status=status.HTTP_200_OK)
@@ -129,20 +129,19 @@ class ProfileViewSet(viewsets.ViewSet):
     def get_queryset(self, request, username, *args, **kwargs):
         queryset = UserAccount.objects.all()
         user = get_object_or_404(queryset, **{'name':username})
-        print(user)
         serializer = ProfileSerializer(user)
         return Response(serializer.data)
 
 
 class EditProfileView(generics.UpdateAPIView):
+    '''
+        owner profile must be edited
+    '''
     permission_classes = (IsAuthenticated,)
     serializer_class = EditProfileSerializer
     queryset = UserAccount.objects.all()
 
-    # def get(self, request, pk, *args, **kwargs):
-    #     instance = get_object_or_404(UserAccount, **{'pk': pk})
-    #     serializer = EditProfileSerializer(instance)
-    #     return Response(serializer.data)
+
 
     def put(self, request, pk, *args, **kwargs):
         queryset = UserAccount.objects.all()
@@ -151,13 +150,6 @@ class EditProfileView(generics.UpdateAPIView):
         print(serializer.data)
         return self.update(request, *args, **kwargs)
 
-
-    # def get_queryset(self, request, username, *args, **kwargs):
-    #     queryset = UserAccount.objects.all()
-    #     user = get_object_or_404(queryset, **{'name':username})
-    #     # user = get_object_or_404(queryset, name=self.kwargs['username'])
-    #     serializer = EditProfileSerializer(user)
-    #     return Response(serializer.data)
 
 
 class ChangePasswordView(generics.UpdateAPIView):
