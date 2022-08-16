@@ -139,7 +139,7 @@ class EditProfileView(generics.UpdateAPIView):
     '''
         owner profile must be edited
     '''
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
     serializer_class = EditProfileSerializer
     queryset = UserAccount.objects.all()
 
@@ -147,11 +147,15 @@ class EditProfileView(generics.UpdateAPIView):
 
     def put(self, request, pk, *args, **kwargs):
         queryset = UserAccount.objects.all()
+        log_in = UserAccount.objects.get(username=request.user)
         user = get_object_or_404(queryset, **{'pk': pk})
-        serializer = EditProfileSerializer(user)
-        print(serializer.data)
-        return self.update(request, *args, **kwargs)
-
+        if user == log_in:
+            serializer = EditProfileSerializer(user)
+            print(serializer.data)
+            return self.update(request, *args, **kwargs)
+        else:
+            content = {'message': 'this is not your profile'}
+            return Response(content,status=status.HTTP_400_BAD_REQUEST)
 
 
 class ChangePasswordView(generics.UpdateAPIView):
@@ -159,3 +163,18 @@ class ChangePasswordView(generics.UpdateAPIView):
     queryset = UserAccount.objects.all()
     permission_classes = (IsAuthenticated,)
     serializer_class = ChangePasswordSerializer
+
+
+    def put(self, request, pk, *args, **kwargs):
+        queryset = UserAccount.objects.all()
+        log_in = UserAccount.objects.get(username=request.user)
+        user = get_object_or_404(queryset, **{'pk': pk})
+        print(log_in)
+        print(user)
+        if user == log_in:
+            serializer = EditProfileSerializer(user)
+            return self.update(request, *args, **kwargs)
+        else:
+            content = {'message': 'you dont have the permission'}
+            return Response(content, status=status.HTTP_400_BAD_REQUEST)
+

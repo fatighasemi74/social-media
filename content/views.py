@@ -67,6 +67,25 @@ class PostEditAPIView(generics.UpdateAPIView):
 
     def put(self, request, pk, *args, **kwargs):
         post = get_object_or_404(Post, **{'pk': pk})
-        serializer = EditPostSerializer(post)
-        print(serializer.data)
-        return self.update(request, *args, **kwargs)
+        log_in = UserAccount.objects.get(username=request.user)
+        print(post.user)
+        print(log_in)
+        if post.user == log_in:
+
+            serializer = EditPostSerializer(post)
+            # print(serializer.data)
+            return self.update(request, *args, **kwargs)
+        else:
+            content = {'message': 'you are not the owner'}
+            return Response(content,status=status.HTTP_400_BAD_REQUEST)
+
+class DeletePosAPIView(generics.DestroyAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = EditPostSerializer
+
+    def delete(self, request, pk, *args, **kwargs):
+        post = get_object_or_404(Post, **{'pk': pk})
+        log_in = UserAccount.objects.get(username=request.user)
+        print(post.user)
+        print(log_in)
+        return self.destroy(request, *args, **kwargs)
