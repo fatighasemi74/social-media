@@ -74,7 +74,7 @@ class LoginView(APIView):
                     httponly = settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
                     samesite = settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
                 )
-                # csrf.get_token(request)
+                csrf.get_token(request)
                 response.data = {"Success" : "Login successfully","data":data['access'], "username": data["username"]}
                 return response
             else:

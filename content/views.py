@@ -36,15 +36,16 @@ class AuthorPostListAPIView(APIView):
         username = self.kwargs['username']
         print('hiiiiiiiiiiiiiiii' , username)
 
-
-        posts = Post.objects.filter(user=username.id)
+        user = UserAccount.objects.filter(name=username).first()
+        # print(user.id)
+        posts = Post.objects.filter(user=user.id)
         print(posts)
         postSerializer = PostListSerializer(posts, many=True)
         print(postSerializer)
         if postSerializer.is_valid():
             postSerializer.save()
         print(postSerializer.data)
-        return queryset
+        return postSerializer.data
 
 
 
@@ -69,11 +70,3 @@ class PostEditAPIView(generics.UpdateAPIView):
         serializer = EditPostSerializer(post)
         print(serializer.data)
         return self.update(request, *args, **kwargs)
-
-
-
-
-
-
-
-
