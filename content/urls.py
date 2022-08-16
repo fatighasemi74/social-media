@@ -1,6 +1,7 @@
 from django.urls import URLPattern, path
 
-from content.views import PostCreateAPIView, PostListAPIView, PostDetailAPIView, AuthorPostListAPIView, PostEditAPIView
+from content.views import PostCreateAPIView, PostListAPIView,\
+    PostDetailAPIView, AuthorPostListAPIView, PostEditAPIView, DeletePosAPIView
 
 urlpatterns = [
     path('posts/',PostListAPIView.as_view(), name='posts-list'),
@@ -8,5 +9,6 @@ urlpatterns = [
     path('post/create/',PostCreateAPIView.as_view(), name='post-create'),
     # path('tag/<int:pk>/', TagDetailAPI.as_view(), name='tag-detail'),
     path('post/detail/<int:pk>/', PostDetailAPIView.as_view(), name='post-detail'),
-    path('post/edit/<int:pk>/', PostEditAPIView.as_view(), name='post-edit')
+    path('post/edit/<int:pk>/', PostEditAPIView.as_view(), name='post-edit'),
+    path('post/delete/<int:pk>/', DeletePosAPIView.as_view(), name='post-edit')
 ]

@@ -10,7 +10,7 @@ from rest_framework import viewsets
 
 from content.permissions import IsOwnerOrReadOnly
 from content.models import Post
-from content.serializers import PostListSerializer, PostDetailSerializer, EditPostSerializer
+from content.serializers import PostListSerializer, PostDetailSerializer, EditPostSerializer, DeletePostSerializer
 
 from account.models import UserAccount
 
@@ -81,11 +81,15 @@ class PostEditAPIView(generics.UpdateAPIView):
 
 class DeletePosAPIView(generics.DestroyAPIView):
     permission_classes = (IsAuthenticated, )
-    serializer_class = EditPostSerializer
+    serializer_class = DeletePostSerializer
+    queryset = Post.objects.all()
 
     def delete(self, request, pk, *args, **kwargs):
         post = get_object_or_404(Post, **{'pk': pk})
         log_in = UserAccount.objects.get(username=request.user)
-        print(post.user)
-        print(log_in)
-        return self.destroy(request, *args, **kwargs)
+        if post.user == log_in:
+            return self.destroy(request, *args, **kwargs)
+        else:
+            content = {'message': 'you cant delete'}
+            return Response(content,status=status.HTTP_400_BAD_REQUEST)
+
