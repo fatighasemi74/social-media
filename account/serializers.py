@@ -45,16 +45,16 @@ class UserAccountCreateSerializer(serializers.ModelSerializer):
             raise ValidationError("This password must contain at least 7 characters.")
         return attr
 
-    # def clean(self):
-    #     # cleaned_data = super().clean()
-    #     # email = cleaned_data.get('email')
-    #     email = self.cleaned_data.get('email')
-    #
-    #     print(email)
-    #     if User.objects.filter(email=email).exists():
-    #         print('errorrrrrr')
-    #         raise ValidationError("Email exists")
-    #     return self.cleaned_data
+    def clean(self):
+        # cleaned_data = super().clean()
+        # email = cleaned_data.get('email')
+        email = self.cleaned_data.get('email')
+
+        print(email)
+        if User.objects.filter(email=email).exists():
+            print('errorrrrrr')
+            raise ValidationError("Email exists")
+        return self.cleaned_data
 
 
     def create(self, validated_data):

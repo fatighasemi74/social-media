@@ -89,16 +89,18 @@ class MyTokenObtainPairView(TokenObtainPairView):
 class UserCreateAPIView(CreateAPIView):
     serializer_class = UserAccountCreateSerializer
 
-    def post(self, request, *args, **kwargs):
-        try:
-            user = self.create(request, *args, **kwargs)
-            content = {'message': 'created succesfully!'}
-            return Response(content, status=status.HTTP_200_OK)
-        except Exception as e:
-            content = {'message': 'user already exist'}
-            return Response(content, status=status.HTTP_201_CREATED)
-
-
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+    # def post(self, request, *args, **kwargs):
+    #     try:
+    #         user = self.create(request, *args, **kwargs)
+    #         content = {'message': 'created succesfully!'}
+    #         return Response(content, status=status.HTTP_200_OK)
+    #     except Exception as e:
+    #         content = {'message': 'user already exist'}
+    #         return Response(content, status=status.HTTP_201_CREATED)
+    #
+    #
 
 
 

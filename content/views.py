@@ -39,9 +39,9 @@ class AuthorPostListAPIView(APIView):
         user = UserAccount.objects.filter(name=username).first()
         # print(user.id)
         posts = Post.objects.filter(user=user.id)
-        print(posts)
+        # print(posts)
         postSerializer = PostListSerializer(posts, many=True)
-        print(postSerializer)
+        # print(postSerializer)
         if postSerializer.is_valid():
             postSerializer.save()
         print(postSerializer.data)
