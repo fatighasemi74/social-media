@@ -6,7 +6,9 @@ class PostListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = '__all__'
+        # fields = '__all__'
+        fields = ('id',  'caption', 'user', 'created_time')
+
 
 class PostDetailSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username')
