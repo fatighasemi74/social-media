@@ -74,10 +74,16 @@ class UserAccountCreateSerializer(serializers.ModelSerializer):
         return  useraccount
 
 class ProfileSerializer(serializers.ModelSerializer):
+    # date_joined = serializers.DateTimeField(
+    #     format='%Y-%m-%d', input_formats=None)
+    date_joined = serializers.SerializerMethodField('get_date_joined')
     class Meta:
         model = UserAccount
-        fields = ('name', 'profile_picture', 'birth_date', 'bio')
-
+        fields = ('name','email', 'date_joined', 'profile_picture', 'birth_date', 'bio')
+    def get_date_joined(self, obj):
+        date_joined = obj.username.date_joined
+        # date_joined = User.objects.get(username=self.context['request'].user).date_joined
+        return date_joined.strftime('%Y-%m-%d')
 
 class EditProfileSerializer(serializers.ModelSerializer):
 

@@ -26,7 +26,7 @@ from content.models import Post
 #new functions:
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
-    refresh['user'] = str(user)
+    refresh['username'] = str(user)
     return {
         'refresh': str(refresh),
         'access': str(refresh.access_token),
@@ -77,7 +77,7 @@ class LoginView(APIView):
                 )
                 csrf.get_token(request)
                 # print(data['access'])
-                response.data = {"Success" : "Login successfully","data":data['access'], "username": data["username"]}
+                response.data = {"Success" : "Login successfully","data":data['access']}
                 return response
             else:
                 return Response({"No active" : "This account is not active!!"}, status=status.HTTP_404_NOT_FOUND)
@@ -147,10 +147,11 @@ class EditProfileView(generics.UpdateAPIView):
 
 
 
-    def put(self, request, pk, *args, **kwargs):
+    def put(self, request, username, *args, **kwargs):
         queryset = UserAccount.objects.all()
         log_in = UserAccount.objects.get(username=request.user)
-        user = get_object_or_404(queryset, **{'pk': pk})
+        user = get_object_or_404(queryset, **{'name':username})
+
         if user == log_in:
             serializer = EditProfileSerializer(user)
             print(serializer.data)
