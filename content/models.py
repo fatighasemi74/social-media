@@ -34,7 +34,7 @@ class Media(BaseModel):
     )
     media_type = models.PositiveSmallIntegerField(choices=TYPE_CHOICES, default=IMAGE )
     post = models.ForeignKey(Post, related_name='media', on_delete=models.CASCADE)
-    media_file = models.FileField(upload_to='content/media', validators=[FileExtensionValidator(allowed_extensions=('jpg', 'jpeg', 'mp4', 'wmv', 'flv', 'png'))])
+    media_file = models.FileField(upload_to='content/media',null=True, blank=True, validators=[FileExtensionValidator(allowed_extensions=('jpg', 'jpeg', 'mp4', 'wmv', 'flv', 'png'))])
 
     class Meta:
         verbose_name = "Media"
