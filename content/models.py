@@ -15,6 +15,7 @@ class Post(BaseModel):
      caption = models.TextField(blank=True, null=True, max_length=1000)
      user = models.ForeignKey(UserAccount, related_name='posts', on_delete=models.CASCADE)
      title = models.CharField(max_length=80, default='')
+     image = models.ImageField(upload_to='content/media', null=True, blank=True, validators=[FileExtensionValidator(allowed_extensions=['jpg', 'png', 'jpeg'])])
 
      class Meta:
          verbose_name = 'post'
@@ -24,21 +25,21 @@ class Post(BaseModel):
         return "{} ({})".format(self.user.username, self.id)
 
 
-class Media(BaseModel):
-    IMAGE = 1
-    VIDEO = 2
-
-    TYPE_CHOICES = (
-        (IMAGE, "Image"),
-        (VIDEO, "Video"),
-    )
-    media_type = models.PositiveSmallIntegerField(choices=TYPE_CHOICES, default=IMAGE )
-    post = models.ForeignKey(Post, related_name='media', on_delete=models.CASCADE)
-    media_file = models.FileField(upload_to='content/media',null=True, blank=True, validators=[FileExtensionValidator(allowed_extensions=('jpg', 'jpeg', 'mp4', 'wmv', 'flv', 'png'))])
-
-    class Meta:
-        verbose_name = "Media"
-        verbose_name_plural = "Medias"
-
-    def __str__(self):
-        return '{}'.format(str(self.post))
+# class Media(BaseModel):
+#     IMAGE = 1
+#     VIDEO = 2
+#
+#     TYPE_CHOICES = (
+#         (IMAGE, "Image"),
+#         (VIDEO, "Video"),
+#     )
+#     media_type = models.PositiveSmallIntegerField(choices=TYPE_CHOICES, default=IMAGE )
+#     post = models.ForeignKey(Post, related_name='media', on_delete=models.CASCADE)
+#     media_file = models.FileField(upload_to='content/media',null=True, blank=True, validators=[FileExtensionValidator(allowed_extensions=('jpg', 'jpeg', 'mp4', 'wmv', 'flv', 'png'))])
+#
+#     class Meta:
+#         verbose_name = "Media"
+#         verbose_name_plural = "Medias"
+#
+#     def __str__(self):
+#         return '{}'.format(str(self.post))

@@ -10,14 +10,15 @@ from rest_framework import viewsets
 
 from content.permissions import IsOwnerOrReadOnly
 from content.models import Post
-from content.serializers import PostListSerializer, PostDetailSerializer, EditPostSerializer, DeletePostSerializer
+from content.serializers import PostListSerializer, PostDetailSerializer,\
+    PostCreateSerializer, EditPostSerializer, DeletePostSerializer
 
 from account.models import UserAccount
 
 
 class PostCreateAPIView(generics.CreateAPIView):
 
-    serializer_class = PostListSerializer
+    serializer_class = PostCreateSerializer
     permission_classes = (IsAuthenticated, )
 
 
