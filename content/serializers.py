@@ -19,6 +19,7 @@ class PostListSerializer(serializers.ModelSerializer):
 
 class PostCreateSerializer(serializers.ModelSerializer):
     # media = PostMediaSerializer(many=True)
+    user = serializers.CharField(source='user.username')
 
     class Meta:
         model = Post
