@@ -20,10 +20,9 @@ class PostListSerializer(serializers.ModelSerializer):
 class PostCreateSerializer(serializers.ModelSerializer):
     # media = PostMediaSerializer(many=True)
     # user = serializers.CharField(source='user.username')
-    username = serializers.CharField(source='user.username', read_only=True)
     class Meta:
         model = Post
-        fields = ('id', 'title', 'caption', 'username', 'image')
+        fields = ('id', 'title', 'caption', 'user', 'image')
 
 class PostDetailSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username')
