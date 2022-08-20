@@ -14,6 +14,7 @@ class BaseModel(models.Model):
 class Post(BaseModel):
      caption = models.TextField(blank=True, null=True, max_length=1000)
      user = models.ForeignKey(UserAccount, related_name='posts', on_delete=models.CASCADE)
+     title = models.CharField(max_length=80, default='')
 
      class Meta:
          verbose_name = 'post'
