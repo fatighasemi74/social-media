@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 
+from django.http import QueryDict
 
 
 from content.permissions import IsOwnerOrReadOnly
@@ -21,7 +22,29 @@ class PostCreateAPIView(generics.CreateAPIView):
     serializer_class = PostCreateSerializer
     permission_classes = (IsAuthenticated, )
 
+    def post(self, request, *args, **kwargs):
+        # print(self.request.user.id)
+        # print(request.data)
+        if isinstance(request.data, QueryDict):  # optional
+            request.data._mutable = True
+        # request.data.update({"user": self.request.user.id})
+        user = self.request.user.id
+        useraccount = UserAccount.objects.filter(username_id=user).first()
+        # print(useraccount.id)
+        request.data['user'] = useraccount.id
+        print(request.data['user'])
 
+        # post = Post.objects.create(user=user, **request.data)
+        # print(post)
+        return super().post(request, *args, **kwargs)
+
+    #     # print(validated_data['user'].id)
+    #     # user_id = validated_data['user'].id
+    #     user = User.objects.filter(username=validated_data['user']).first()
+    #     print(user.id)
+    #     print(validated_data['user'])
+    #     post = Post.objects.create(**validated_data)
+    #     return post
 
 class PostListAPIView(generics.ListAPIView):
     queryset = Post.objects.all()

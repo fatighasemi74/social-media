@@ -1,7 +1,9 @@
 from rest_framework import serializers
 from content.models import  Post
 
-# from .models import Media
+from account.models import UserAccount
+from django.contrib.auth.models import User
+
 #
 # class PostMediaSerializer(serializers.ModelSerializer):
 #     class Meta:
@@ -18,11 +20,19 @@ class PostListSerializer(serializers.ModelSerializer):
         fields = ('id','title',  'caption', 'user', 'image', 'user_image')
 
 class PostCreateSerializer(serializers.ModelSerializer):
-    # media = PostMediaSerializer(many=True)
-    # user = serializers.CharField(source='user.username')
+
     class Meta:
         model = Post
         fields = ('id', 'title', 'caption', 'user', 'image')
+
+    # def create(self, validated_data):
+    #     # print(validated_data['user'].id)
+    #     # user_id = validated_data['user'].id
+    #     user = User.objects.filter(username=validated_data['user']).first()
+    #     print(user.id)
+    #     print(validated_data['user'])
+    #     post = Post.objects.create(**validated_data)
+    #     return post
 
 class PostDetailSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username')
