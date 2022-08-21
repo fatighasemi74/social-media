@@ -23,28 +23,13 @@ class PostCreateAPIView(generics.CreateAPIView):
     permission_classes = (IsAuthenticated, )
 
     def post(self, request, *args, **kwargs):
-        # print(self.request.user.id)
-        # print(request.data)
-        if isinstance(request.data, QueryDict):  # optional
+        if isinstance(request.data, QueryDict):
             request.data._mutable = True
-        # request.data.update({"user": self.request.user.id})
         user = self.request.user.id
         useraccount = UserAccount.objects.filter(username_id=user).first()
-        # print(useraccount.id)
         request.data['user'] = useraccount.id
-        print(request.data['user'])
-
-        # post = Post.objects.create(user=user, **request.data)
-        # print(post)
         return super().post(request, *args, **kwargs)
 
-    #     # print(validated_data['user'].id)
-    #     # user_id = validated_data['user'].id
-    #     user = User.objects.filter(username=validated_data['user']).first()
-    #     print(user.id)
-    #     print(validated_data['user'])
-    #     post = Post.objects.create(**validated_data)
-    #     return post
 
 class PostListAPIView(generics.ListAPIView):
     queryset = Post.objects.all()
