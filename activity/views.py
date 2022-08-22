@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 
 
 from .models import Comment
-from .serializers import CommentCreateSerializer, CommentListSerializer, CommentUpdateSerializer
+from .serializers import CommentCreateSerializer, CommentListSerializer, CommentUpdateSerializer, LikeCreateSerializer
 from account.models import UserAccount
 
 class CommentCreateAPIView(CreateAPIView):
@@ -41,3 +41,13 @@ class CommentRetrieveAPIView(RetrieveUpdateDestroyAPIView):
         useraccount = UserAccount.objects.filter(username_id=user).first()
         return qs.filter(user=useraccount)
 
+class LikeCreateAPIView(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    queryset = Comment.objects.all()
+    serializer_class = LikeCreateSerializer
+
+
+    def perform_create(self, serializer):
+        user = self.request.user.id
+        useraccount = UserAccount.objects.filter(username_id=user).first()
+        serializer.save(user=useraccount)

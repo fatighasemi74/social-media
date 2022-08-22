@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from .models import Comment
-# from content.serializers import PostDetailSerializer
+
+
+from .models import Comment, Like
 
 
 class CommentCreateSerializer(serializers.ModelSerializer):
@@ -55,3 +56,7 @@ class CommentUpdateSerializer(serializers.ModelSerializer):
             raise ValidationError("Caption cannot be more than 30 characters!!")
         return attr
 
+class LikeCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Like
+        fields = ['post']
