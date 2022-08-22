@@ -7,11 +7,17 @@ from activity.serializers import CommentListSerializer
 class PostListSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username')
     user_image = serializers.ImageField(source='user.profile_picture')
+    comments = serializers.IntegerField(source='comments.count', read_only=True)
     # media = PostMediaSerializer(many=True)
     class Meta:
         model = Post
         # fields = '__all__'
-        fields = ('id','title',  'caption', 'user', 'image', 'user_image')
+        fields = ('id','title',  'caption', 'user', 'image', 'user_image', 'comments')
+
+    # def get_comments(self, obj):
+    #     serializer = CommentListSerializer(obj.comments.filter(reply_to__isnull=True), many=True)
+    #     return serializer.count()
+
 
 class PostCreateSerializer(serializers.ModelSerializer):
 
