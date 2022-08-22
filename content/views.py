@@ -3,11 +3,11 @@ from rest_framework.views import APIView
 from rest_framework import status, generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 
 from django.http import QueryDict
-
 
 from content.permissions import IsOwnerOrReadOnly
 from content.models import Post
@@ -38,23 +38,6 @@ class PostListAPIView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, )
 
 
-class AuthorPostListAPIView(APIView):
-    permission_classes = (IsAuthenticated, )
-
-    def get(self, request, *args, **kwargs):
-        username = self.kwargs['username']
-        print('hiiiiiiiiiiiiiiii' , username)
-
-        user = UserAccount.objects.filter(name=username).first()
-        # print(user.id)
-        posts = Post.objects.filter(user=user.id)
-        # print(posts)
-        postSerializer = PostListSerializer(posts, many=True)
-        # print(postSerializer)
-        if postSerializer.is_valid():
-            postSerializer.save()
-        print(postSerializer.data)
-        return postSerializer.data
 
 
 
@@ -102,3 +85,16 @@ class DeletePosAPIView(generics.DestroyAPIView):
             content = {'message': 'you cant delete'}
             return Response(content,status=status.HTTP_400_BAD_REQUEST)
 
+class UserPostListAPIView(generics.ListAPIView):
+    serializer_class = PostDetailSerializer
+    permission_classes = (IsAuthenticated, )
+    queryset = Post.objects.all()
+    lookup_url_kwarg = 'user_id'
+
+    pagination_class = PageNumberPagination
+    page_size = 10
+    pagination_class.page_size = page_size
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return qs.filter(user_id=self.kwargs[self.lookup_url_kwarg])
