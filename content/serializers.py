@@ -8,11 +8,12 @@ class PostListSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username')
     user_image = serializers.ImageField(source='user.profile_picture')
     comments = serializers.IntegerField(source='comments.count', read_only=True)
+    likes = serializers.IntegerField(source='likes.count', read_only=True)
     # media = PostMediaSerializer(many=True)
     class Meta:
         model = Post
         # fields = '__all__'
-        fields = ('id','title',  'caption', 'user', 'image', 'user_image', 'comments')
+        fields = ('id','title',  'caption', 'user', 'image', 'user_image', 'comments', 'likes')
 
     # def get_comments(self, obj):
     #     serializer = CommentListSerializer(obj.comments.filter(reply_to__isnull=True), many=True)
@@ -32,9 +33,11 @@ class PostDetailSerializer(serializers.ModelSerializer):
     user_image = serializers.ImageField(source='user.profile_picture')
     # media = PostMediaSerializer(many=True)
     comments = serializers.SerializerMethodField()
+    likes = serializers.IntegerField(source='likes.count', read_only=True)
+
     class Meta:
         model = Post
-        fields = ('id','title',  'caption', 'user', 'image', 'user_image', 'comments')
+        fields = ('id','title',  'caption', 'user', 'image', 'user_image', 'comments', 'likes')
 
     def get_comments(self, obj):
         serializer = CommentListSerializer(obj.comments.filter(reply_to__isnull=True), many=True)
