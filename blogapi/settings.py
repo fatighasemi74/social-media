@@ -193,8 +193,8 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     },
 
-    'DEFAULT_PAGINATION_CLASSES': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
+    # 'DEFAULT_PAGINATION_CLASSES': 'rest_framework.pagination.PageNumberPagination',
+    # 'PAGE_SIZE': 10
 }
 # AUTH_USER_MODEL = 'account.UserAccount'
 

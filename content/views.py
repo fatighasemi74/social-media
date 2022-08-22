@@ -91,9 +91,9 @@ class UserPostListAPIView(generics.ListAPIView):
     queryset = Post.objects.all()
     lookup_url_kwarg = 'user_id'
 
-    pagination_class = PageNumberPagination
-    page_size = 10
-    pagination_class.page_size = page_size
+    # pagination_class = PageNumberPagination
+    # page_size = 10
+    # pagination_class.page_size = page_size
 
     def get_queryset(self):
         qs = super().get_queryset()
