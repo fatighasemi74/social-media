@@ -1,6 +1,8 @@
 from rest_framework import serializers
-from content.models import  Post
 
+
+from content.models import  Post
+from activity.serializers import CommentListSerializer
 
 class PostListSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username')
@@ -23,9 +25,14 @@ class PostDetailSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username')
     user_image = serializers.ImageField(source='user.profile_picture')
     # media = PostMediaSerializer(many=True)
+    comments = serializers.SerializerMethodField()
     class Meta:
         model = Post
-        fields = ('id','title',  'caption', 'user', 'image', 'user_image')
+        fields = ('id','title',  'caption', 'user', 'image', 'user_image', 'comments')
+
+    def get_comments(self, obj):
+        serializer = CommentListSerializer(obj.comments.filter(reply_to__isnull=True), many=True)
+        return serializer.data
 
 class EditPostSerializer(serializers.ModelSerializer):
     class Meta:
