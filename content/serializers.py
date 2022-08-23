@@ -50,10 +50,12 @@ class PostDetailSerializer(serializers.ModelSerializer):
 class EditPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ('id','caption')
+        fields = ('id','caption', 'title')
     def update(self, instance, validated_data):
         if validated_data['caption']:
             instance.caption = validated_data['caption']
+        if validated_data['title']:
+            instance.title = validated_data['title']
         instance.save()
         return instance
 
