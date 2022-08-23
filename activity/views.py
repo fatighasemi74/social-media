@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from rest_framework.generics import CreateAPIView, ListAPIView,\
-     RetrieveUpdateDestroyAPIView
+     RetrieveUpdateDestroyAPIView, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated
-
+from django.shortcuts import get_object_or_404
+from rest_framework import status
+from rest_framework.response import Response
 
 
 from .models import Comment
@@ -40,6 +42,22 @@ class CommentRetrieveAPIView(RetrieveUpdateDestroyAPIView):
         user = self.request.user.id
         useraccount = UserAccount.objects.filter(username_id=user).first()
         return qs.filter(user=useraccount)
+    
+class DeleteCommentAPIView(DestroyAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = CommentListSerializer
+    queryset = Comment.objects.all()
+    
+    def delete(self, request, pk, *args, **kwargs):
+        comment = get_object_or_404(Comment, **{'pk': pk})
+        log_in = UserAccount.objects.get(username=request.user)
+        if comment.user == log_in:
+            self.destroy(request, *args, **kwargs)
+            content = {'message': 'deleted'}
+            return Response(content,status=status.HTTP_200_OK)
+        else:
+            content = {'message': 'you cant delete'}
+            return Response(content,status=status.HTTP_400_BAD_REQUEST)
 
 class LikeCreateAPIView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
