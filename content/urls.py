@@ -9,5 +9,5 @@ urlpatterns = [
     path('post/detail/<int:pk>/', PostDetailAPIView.as_view(), name='post-detail'),
     path('post/edit/<int:pk>/', PostEditAPIView.as_view(), name='post-edit'),
     path('post/delete/<int:pk>/', DeletePosAPIView.as_view(), name='post-edit'),
-    path('post/user/<int:user_id>/', UserPostListAPIView.as_view(), name='user-post-list')
+    path('post/user/<str:username>/', UserPostListAPIView.as_view(), name='user-post-list')
 ]

@@ -89,7 +89,7 @@ class UserPostListAPIView(generics.ListAPIView):
     serializer_class = PostDetailSerializer
     permission_classes = (IsAuthenticated, )
     queryset = Post.objects.all()
-    lookup_url_kwarg = 'user_id'
+    lookup_url_kwarg = 'username'
 
     # pagination_class = PageNumberPagination
     # page_size = 10
@@ -97,4 +97,8 @@ class UserPostListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        return qs.filter(user_id=self.kwargs[self.lookup_url_kwarg])
+        print(qs)
+        username = self.kwargs[self.lookup_url_kwarg]
+        user = UserAccount.objects.filter(name=username).first()
+        return qs.filter(user=user.id)
+
