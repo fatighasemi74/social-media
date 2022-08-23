@@ -17,6 +17,7 @@ class Post(BaseModel):
      user = models.ForeignKey(UserAccount, related_name='posts', on_delete=models.CASCADE)
      title = models.CharField(max_length=80, default='')
      image = models.ImageField(upload_to='content/media', null=True, blank=True, validators=[FileExtensionValidator(allowed_extensions=['jpg', 'png', 'jpeg'])])
+     # created_time = models.DateTimeField("created time", auto_now_add=True)
 
      class Meta:
          verbose_name = 'post'
