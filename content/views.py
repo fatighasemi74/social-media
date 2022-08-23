@@ -80,7 +80,9 @@ class DeletePosAPIView(generics.DestroyAPIView):
         post = get_object_or_404(Post, **{'pk': pk})
         log_in = UserAccount.objects.get(username=request.user)
         if post.user == log_in:
-            return self.destroy(request, *args, **kwargs)
+            self.destroy(request, *args, **kwargs)
+            content = {'message': 'deleted'}
+            return Response(content,status=status.HTTP_200_OK)
         else:
             content = {'message': 'you cant delete'}
             return Response(content,status=status.HTTP_400_BAD_REQUEST)
@@ -97,7 +99,6 @@ class UserPostListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        print(qs)
         username = self.kwargs[self.lookup_url_kwarg]
         user = UserAccount.objects.filter(name=username).first()
         return qs.filter(user=user.id)
