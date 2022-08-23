@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 
 from content.models import  Post
-from activity.serializers import CommentListSerializer
+from activity.serializers import CommentListSerializer, LikeListSerializer
 
 class PostListSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username')
@@ -33,7 +33,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
     user_image = serializers.ImageField(source='user.profile_picture')
     # media = PostMediaSerializer(many=True)
     comments = serializers.SerializerMethodField()
-    likes = serializers.IntegerField(source='likes.count', read_only=True)
+    likes = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -41,6 +41,10 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
     def get_comments(self, obj):
         serializer = CommentListSerializer(obj.comments.filter(reply_to__isnull=True), many=True)
+        return serializer.data
+
+    def get_likes(self, obj):
+        serializer = LikeListSerializer(obj.likes.all(), many=True)
         return serializer.data
 
 class EditPostSerializer(serializers.ModelSerializer):

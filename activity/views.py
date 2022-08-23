@@ -8,7 +8,8 @@ from rest_framework.response import Response
 
 
 from .models import Comment
-from .serializers import CommentCreateSerializer, CommentListSerializer, CommentUpdateSerializer, LikeCreateSerializer
+from .serializers import CommentCreateSerializer, CommentListSerializer, CommentUpdateSerializer,\
+    LikeCreateSerializer, LikeListSerializer
 from account.models import UserAccount
 
 class CommentCreateAPIView(CreateAPIView):
@@ -69,3 +70,8 @@ class LikeCreateAPIView(CreateAPIView):
         user = self.request.user.id
         useraccount = UserAccount.objects.filter(username_id=user).first()
         serializer.save(user=useraccount)
+
+class CommentListAPIView(ListAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = LikeListSerializer
+    permission_classes = (IsAuthenticated, )
