@@ -37,7 +37,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('id','title',  'caption', 'user', 'image', 'user_image', 'comments', 'likes')
+        fields = ('id','title',  'caption', 'user', 'image', 'user_image', 'comments', 'likes', 'created_time')
 
     def get_comments(self, obj):
         serializer = CommentListSerializer(obj.comments.filter(reply_to__isnull=True), many=True)
