@@ -16,7 +16,7 @@ from content.serializers import PostListSerializer, PostDetailSerializer,\
 
 from account.models import UserAccount
 
-from relation.permissions import RelationExists
+from relation.permissions import RelationExists, HasPostPermission
 
 class PostCreateAPIView(generics.CreateAPIView):
 
@@ -43,13 +43,14 @@ class PostListAPIView(generics.ListAPIView):
 
 
 
-class PostDetailAPIView(APIView):
-    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly )
-
-    def get(self, request, pk, *args, **kwargs):
-        instance = get_object_or_404(Post, **{'pk':pk})
-        serializer = PostDetailSerializer(instance)
-        return Response(serializer.data)
+class PostDetailAPIView(generics.RetrieveAPIView):
+    permission_classes = (IsAuthenticated, HasPostPermission)
+    serializer_class = PostDetailSerializer
+    queryset = Post.objects.all()
+    # def get(self, request, pk, *args, **kwargs):
+    #     instance = get_object_or_404(Post, **{'pk':pk})
+    #     serializer = PostDetailSerializer(instance)
+    #     return Response(serializer.data)
 
     
 class PostEditAPIView(generics.UpdateAPIView):
