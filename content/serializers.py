@@ -19,7 +19,9 @@ class PostListSerializer(serializers.ModelSerializer):
     # def get_comments(self, obj):
     #     serializer = CommentListSerializer(obj.comments.filter(reply_to__isnull=True), many=True)
     #     return serializer.count()
-
+    def get_likes(self, obj):
+        serializer = LikeListSerializer(obj.likes.all(), many=True)
+        return serializer.data
 
 class PostCreateSerializer(serializers.ModelSerializer):
 
