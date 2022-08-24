@@ -1,8 +1,7 @@
 from django.urls import URLPattern, path
 
-# from content.views import PostCreateAPIView, PostListAPIView,\
-#     PostDetailAPIView, PostEditAPIView, DeletePosAPIView, UserPostListAPIView
+from .views import CreateRelationAPIView
 
 urlpatterns = [
-    # path('posts/',PostListAPIView.as_view(), name='posts-list'),
+    path('create/',CreateRelationAPIView.as_view(), name='create-relation'),
 ]

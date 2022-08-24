@@ -12,8 +12,11 @@ from .serializers import CommentCreateSerializer, CommentListSerializer, Comment
     LikeCreateSerializer, LikeListSerializer
 from account.models import UserAccount
 
+from relation.permissions import RelationExists, HasPostPermission
+
+
 class CommentCreateAPIView(CreateAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
     queryset = Comment.objects.all()
     serializer_class = CommentCreateSerializer
 
