@@ -16,6 +16,7 @@ from content.serializers import PostListSerializer, PostDetailSerializer,\
 
 from account.models import UserAccount
 
+from relation.permissions import RelationExists
 
 class PostCreateAPIView(generics.CreateAPIView):
 
@@ -89,7 +90,7 @@ class DeletePosAPIView(generics.DestroyAPIView):
 
 class UserPostListAPIView(generics.ListAPIView):
     serializer_class = PostDetailSerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated, RelationExists )
     queryset = Post.objects.all()
     lookup_url_kwarg = 'username'
 
