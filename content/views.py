@@ -44,7 +44,7 @@ class PostListAPIView(generics.ListAPIView):
 
 
 class PostDetailAPIView(generics.RetrieveAPIView):
-    permission_classes = (IsAuthenticated, HasPostPermission)
+    permission_classes = (IsAuthenticated, RelationExists)
     serializer_class = PostDetailSerializer
     queryset = Post.objects.all()
     # def get(self, request, pk, *args, **kwargs):
@@ -91,7 +91,7 @@ class DeletePosAPIView(generics.DestroyAPIView):
 
 class UserPostListAPIView(generics.ListAPIView):
     serializer_class = PostDetailSerializer
-    permission_classes = (IsAuthenticated, RelationExists )
+    permission_classes = (IsAuthenticated,  )
     queryset = Post.objects.all()
     lookup_url_kwarg = 'username'
 
