@@ -79,7 +79,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     date_joined = serializers.SerializerMethodField('get_date_joined')
     class Meta:
         model = UserAccount
-        fields = ('name','email', 'date_joined', 'profile_picture', 'birth_date', 'bio')
+        fields = ('id', 'name','email', 'date_joined', 'profile_picture', 'birth_date', 'bio')
     def get_date_joined(self, obj):
         date_joined = obj.username.date_joined
         # date_joined = User.objects.get(username=self.context['request'].user).date_joined

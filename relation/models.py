@@ -1,7 +1,7 @@
 from django.db import models
 
 from django.contrib.auth.models import User
-
+from account.models import UserAccount
 
 
 
@@ -15,8 +15,8 @@ class BaseModel(models.Model):
 
 
 class Relation(BaseModel):
-    from_user = models.ForeignKey(User, related_name='followings', on_delete=models.CASCADE)
-    to_user = models.ForeignKey(User, related_name='follewrs', on_delete=models.CASCADE)
+    from_user = models.ForeignKey(UserAccount, related_name='followings', on_delete=models.CASCADE)
+    to_user = models.ForeignKey(UserAccount, related_name='follewrs', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Relation'
