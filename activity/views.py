@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.response import Response
 
 
-from .models import Comment
+from .models import Comment, Like
 from .serializers import CommentCreateSerializer, CommentListSerializer, CommentUpdateSerializer,\
     LikeCreateSerializer, LikeListSerializer
 from account.models import UserAccount
@@ -65,7 +65,7 @@ class DeleteCommentAPIView(DestroyAPIView):
 
 class LikeCreateAPIView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    queryset = Comment.objects.all()
+    queryset = Like.objects.all()
     serializer_class = LikeCreateSerializer
 
 
@@ -74,7 +74,23 @@ class LikeCreateAPIView(CreateAPIView):
         useraccount = UserAccount.objects.filter(username_id=user).first()
         serializer.save(user=useraccount)
 
-class CommentListAPIView(ListAPIView):
-    queryset = Comment.objects.all()
+class LiketListAPIView(ListAPIView):
+    queryset = Like.objects.all()
     serializer_class = LikeListSerializer
     permission_classes = (IsAuthenticated, )
+
+class DeleteLikeAPIView(DestroyAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = LikeListSerializer
+    queryset = Like.objects.all()
+
+    def delete(self, request, pk, *args, **kwargs):
+        like = get_object_or_404(Like, **{'pk': pk})
+        log_in = UserAccount.objects.get(username=request.user)
+        if like.user == log_in:
+            self.destroy(request, *args, **kwargs)
+            content = {'message': 'deleted'}
+            return Response(content,status=status.HTTP_200_OK)
+        else:
+            content = {'message': 'you cant delete'}
+            return Response(content,status=status.HTTP_400_BAD_REQUEST)
