@@ -3,7 +3,7 @@ from rest_framework import serializers
 from account.models import UserAccount
 from .models import Relation
 
-class CreateRelationSerializer(serializers.ModelSerializer):
+class CreateOrDeleteRelationSerializer(serializers.ModelSerializer):
     # to_user = serializers.CharField(source='to_user.username')
     # to_user = serializers.SerializerMethodField()
     # to_user = serializers.CharField(
@@ -30,3 +30,8 @@ class RelationListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Relation
         fields = ('from_user', 'to_user')
+
+class DeleteRelation(serializers.ModelSerializer):
+    class Meta:
+        model = Relation
+        fields = "__all__"
