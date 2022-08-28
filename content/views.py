@@ -16,7 +16,7 @@ from content.serializers import PostListSerializer, PostDetailSerializer,\
 
 from account.models import UserAccount
 
-from .permissions import RelationExists, HasPostPermission
+from relation.permissions import RelationExists, HasPostPermission
 
 class PostCreateAPIView(generics.CreateAPIView):
 
