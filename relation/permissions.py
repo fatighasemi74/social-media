@@ -28,3 +28,4 @@ class HasPostPermission(BasePermission):
         if Relation.objects.filter(from_user=from_user, to_user=to_user).exists() or from_user == to_user:
             return True
         return False
+
