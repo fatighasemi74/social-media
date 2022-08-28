@@ -5,7 +5,6 @@ from rest_framework.permissions import IsAuthenticated
 from account.models import UserAccount
 from .models import Relation
 from .serializers import CreateRelationSerializer, RelationListSerializer
-from .permissions import RelationExists, HasPostPermission
 
 class CreateRelationAPIView(CreateAPIView):
     queryset = Relation.objects.all()

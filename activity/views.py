@@ -12,7 +12,6 @@ from .serializers import CommentCreateSerializer, CommentListSerializer, Comment
     LikeCreateSerializer, LikeListSerializer
 from account.models import UserAccount
 
-from relation.permissions import RelationExists, HasPostPermission
 
 
 class CommentCreateAPIView(CreateAPIView):
