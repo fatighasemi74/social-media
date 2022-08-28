@@ -7,6 +7,7 @@ from django.contrib.auth.hashers import make_password
 
 
 from .models import UserAccount
+from relation.serializers import RelationListSerializer
 from django.contrib.auth.models import User
 
 
@@ -74,16 +75,24 @@ class UserAccountCreateSerializer(serializers.ModelSerializer):
         return  useraccount
 
 class ProfileSerializer(serializers.ModelSerializer):
-    # date_joined = serializers.DateTimeField(
-    #     format='%Y-%m-%d', input_formats=None)
+    follower = serializers.SerializerMethodField()
+    following = serializers.SerializerMethodField()
     date_joined = serializers.SerializerMethodField('get_date_joined')
     class Meta:
         model = UserAccount
-        fields = ('id', 'name','email', 'date_joined', 'profile_picture', 'birth_date', 'bio')
+        fields = ('id', 'name','email', 'date_joined',
+                  'profile_picture', 'birth_date', 'bio', 'follower', 'following')
     def get_date_joined(self, obj):
         date_joined = obj.username.date_joined
-        # date_joined = User.objects.get(username=self.context['request'].user).date_joined
         return date_joined.strftime('%Y-%m-%d')
+
+    def get_follower(self, obj):
+        serializer = RelationListSerializer(obj.follewrs.all(), many=True)
+        return serializer.data
+
+    def get_following(self, obj):
+        serializer = RelationListSerializer(obj.followings.all(), many=True)
+        return serializer.data
 
 class EditProfileSerializer(serializers.ModelSerializer):
 

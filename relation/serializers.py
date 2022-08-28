@@ -31,7 +31,3 @@ class RelationListSerializer(serializers.ModelSerializer):
         model = Relation
         fields = ('from_user', 'to_user')
 
-class DeleteRelation(serializers.ModelSerializer):
-    class Meta:
-        model = Relation
-        fields = "__all__"

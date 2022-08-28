@@ -8,7 +8,7 @@ from rest_framework import status
 
 from account.models import UserAccount
 from .models import Relation
-from .serializers import CreateOrDeleteRelationSerializer, RelationListSerializer, DeleteRelation
+from .serializers import CreateOrDeleteRelationSerializer, RelationListSerializer
 
 class CreateRelationAPIView(CreateAPIView):
     queryset = Relation.objects.all()
@@ -30,7 +30,7 @@ class RelationListAPIView(ListAPIView):
 
 class DeleteRelationAPIView(DestroyAPIView):
     queryset = Relation.objects.all()
-    serializer_class = DeleteRelation
+    serializer_class = CreateOrDeleteRelationSerializer
     permission_classes = (IsAuthenticated, )
     lookup_url_kwarg = 'username'
 
