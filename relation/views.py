@@ -38,7 +38,7 @@ class DeleteRelationAPIView(DestroyAPIView):
     def delete(self, request, username, *args, **kwargs):
         useraccount = UserAccount.objects.filter(name=username).first()
         relation = Relation.objects.filter(to_user=useraccount.id).first()
-        print(relation)
+        # print(relation)
         if relation:
             # self.destroy(request, *args, **kwargs)
             relation.delete()

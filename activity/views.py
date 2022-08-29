@@ -93,10 +93,16 @@ class DeleteLikeAPIView(DestroyAPIView):
     queryset = Like.objects.all()
 
     def delete(self, request, pk, *args, **kwargs):
-        like = get_object_or_404(Like, **{'pk': pk})
+        # like = get_object_or_404(Like, **{'pk': pk})
+        post = Post.objects.filter(id=pk).first()
+        print(post.user)
         log_in = UserAccount.objects.get(username=request.user)
-        if like.user == log_in:
-            self.destroy(request, *args, **kwargs)
+        like = Like.objects.filter(user=log_in, post=post).first()
+        if like:
+
+        # if like.user == log_in:
+        #     self.destroy(request, *args, **kwargs)
+            like.delete()
             content = {'message': 'deleted'}
             return Response(content,status=status.HTTP_200_OK)
         else:

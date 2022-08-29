@@ -176,6 +176,12 @@ STATIC_URL = '/static/'
 STATIC_ROOT= BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_USE_TLS = 587
+EMAIL_HOST_USER = 'f.ghasembang@gmail.com'
+EMAIL_HOST_PASSWORD = 'fati.121221'
 
 
 # Default primary key field type

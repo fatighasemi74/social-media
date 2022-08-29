@@ -11,6 +11,8 @@ from django.contrib.auth import logout
 from rest_framework import viewsets
 from rest_framework import status, generics
 from django.shortcuts import get_object_or_404
+from django.core.mail import send_mail
+
 
 from django.contrib.auth.models import User
 
@@ -93,6 +95,14 @@ class UserCreateAPIView(CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+        # name = serializer.data['name']
+        # subject = 'welcome to our website!!'
+        # message = f'Hi {name}, thank you for registering in here.'
+        # email_form = settings.EMAIL_HOST_USER
+        # recipient_list = [serializer.data['email'], ]
+        # send_mail( subject, message, email_form, recipient_list, fail_silently=False)
+        # print(serializer.data)
 
 
 
