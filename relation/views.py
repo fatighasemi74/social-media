@@ -4,11 +4,12 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import viewsets
 
 
 from account.models import UserAccount
 from .models import Relation
-from .serializers import CreateOrDeleteRelationSerializer, RelationListSerializer
+from .serializers import CreateOrDeleteRelationSerializer, RelationListSerializer, FollowingListSerializer
 
 class CreateRelationAPIView(CreateAPIView):
     queryset = Relation.objects.all()
@@ -47,3 +48,28 @@ class DeleteRelationAPIView(DestroyAPIView):
         else:
             content = {'message': 'you cant delete'}
             return Response(content,status=status.HTTP_400_BAD_REQUEST)
+
+class FollowingAPIView(ListAPIView):
+    serializer_class = FollowingListSerializer
+    permission_classes = (IsAuthenticated, )
+    queryset = Relation.objects.all()
+    lookup_url_kwarg = 'username'
+
+
+    def get_queryset(self):
+        username = self.kwargs[self.lookup_url_kwarg]
+        user = UserAccount.objects.filter(name=username).first()
+        qs = Relation.objects.filter(from_user=user.id)
+        return qs.filter(from_user=user.id)
+
+class FollowerAPIView(ListAPIView):
+    serializer_class = FollowingListSerializer
+    permission_classes = (IsAuthenticated, )
+    queryset = Relation.objects.all()
+    lookup_url_kwarg = 'username'
+
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        username = self.kwargs[self.lookup_url_kwarg]
+        print(username)

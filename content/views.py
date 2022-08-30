@@ -43,16 +43,7 @@ class PostListAPIView(generics.ListAPIView):
 
 
 
-class PostDetailAPIView(generics.RetrieveAPIView):
-    permission_classes = (IsAuthenticated, )#HasPostPermission)
-    serializer_class = PostDetailSerializer
-    queryset = Post.objects.all()
-    # def get(self, request, pk, *args, **kwargs):
-    #     instance = get_object_or_404(Post, **{'pk':pk})
-    #     serializer = PostDetailSerializer(instance)
-    #     return Response(serializer.data)
 
-    
 class PostEditAPIView(generics.UpdateAPIView):
     permission_classes = (IsAuthenticated, )
     serializer_class = EditPostSerializer
@@ -89,15 +80,39 @@ class DeletePosAPIView(generics.DestroyAPIView):
             content = {'message': 'you cant delete'}
             return Response(content,status=status.HTTP_400_BAD_REQUEST)
 
-class UserPostListAPIView(generics.ListAPIView):
+
+#user post before using viewsets:
+
+# class PostDetailAPIView(generics.RetrieveAPIView):
+#     permission_classes = (IsAuthenticated,)  # HasPostPermission)
+#     serializer_class = PostDetailSerializer
+#     queryset = Post.objects.all()
+#
+
+# class UserPostListAPIView(generics.ListAPIView):
+#     serializer_class = PostDetailSerializer
+#     permission_classes = (IsAuthenticated, )#RelationExists )
+#     queryset = Post.objects.all()
+#     lookup_url_kwarg = 'username'
+#
+#     # pagination_class = PageNumberPagination
+#     # page_size = 10
+#     # pagination_class.page_size = page_size
+#
+#     def get_queryset(self):
+#         qs = super().get_queryset()
+#         username = self.kwargs[self.lookup_url_kwarg]
+#         user = UserAccount.objects.filter(name=username).first()
+#         return qs.filter(user=user.id)
+
+
+class UserPostReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = PostDetailSerializer
-    permission_classes = (IsAuthenticated, )#RelationExists )
+    permission_classes = (IsAuthenticated, )
     queryset = Post.objects.all()
     lookup_url_kwarg = 'username'
+    lookup_field = 'pk'
 
-    # pagination_class = PageNumberPagination
-    # page_size = 10
-    # pagination_class.page_size = page_size
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -105,4 +120,8 @@ class UserPostListAPIView(generics.ListAPIView):
         user = UserAccount.objects.filter(name=username).first()
         return qs.filter(user=user.id)
 
-
+    def get_object(self):
+        qs = super().get_queryset()
+        # print(self.kwargs['pk'])
+        post = Post.objects.filter(id=self.kwargs['pk']).first()
+        return post
