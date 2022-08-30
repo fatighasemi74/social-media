@@ -40,3 +40,10 @@ class FollowingListSerializer(serializers.ModelSerializer):
         model = Relation
         fields = ('to_user', 'image')
 
+class FollowerListSerializer(serializers.ModelSerializer):
+    from_user = serializers.CharField(source='from_user.username')
+    image = serializers.ImageField(source='from_user.profile_picture')
+
+    class Meta:
+        model = Relation
+        fields = ('from_user', 'image')

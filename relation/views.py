@@ -9,7 +9,8 @@ from rest_framework import viewsets
 
 from account.models import UserAccount
 from .models import Relation
-from .serializers import CreateOrDeleteRelationSerializer, RelationListSerializer, FollowingListSerializer
+from .serializers import CreateOrDeleteRelationSerializer, RelationListSerializer,\
+    FollowingListSerializer, FollowerListSerializer
 
 class CreateRelationAPIView(CreateAPIView):
     queryset = Relation.objects.all()
@@ -63,13 +64,14 @@ class FollowingAPIView(ListAPIView):
         return qs.filter(from_user=user.id)
 
 class FollowerAPIView(ListAPIView):
-    serializer_class = FollowingListSerializer
+    serializer_class = FollowerListSerializer
     permission_classes = (IsAuthenticated, )
     queryset = Relation.objects.all()
     lookup_url_kwarg = 'username'
 
 
     def get_queryset(self):
-        qs = super().get_queryset()
         username = self.kwargs[self.lookup_url_kwarg]
-        print(username)
+        user = UserAccount.objects.filter(name=username).first()
+        qs = Relation.objects.filter(to_user=user.id)
+        return qs.filter(to_user=user.id)
