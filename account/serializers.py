@@ -78,6 +78,8 @@ class ProfileSerializer(serializers.ModelSerializer):
     follower = serializers.SerializerMethodField()
     following = serializers.SerializerMethodField()
     date_joined = serializers.SerializerMethodField('get_date_joined')
+    # user_image = serializers.ImageField(source='follower.profile_picture')
+
     class Meta:
         model = UserAccount
         fields = ('id', 'name','email', 'date_joined',
@@ -88,11 +90,12 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def get_follower(self, obj):
         serializer = RelationListSerializer(obj.follewrs.all(), many=True)
-        return serializer.data
+        return serializer.data[0]['from_user']
 
     def get_following(self, obj):
         serializer = RelationListSerializer(obj.followings.all(), many=True)
-        return serializer.data
+        # print(serializer.data[0]['to_user'])
+        return serializer.data[0]['to_user']
 
 class EditProfileSerializer(serializers.ModelSerializer):
 

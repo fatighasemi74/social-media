@@ -129,7 +129,7 @@ class LogoutView(APIView):
 
 class ProfileViewSet(viewsets.ViewSet):
     serializer_class = ProfileSerializer
-    permission_classes = (IsAuthenticated, RelationExists)
+    permission_classes = (IsAuthenticated, )#RelationExists)
 
     def get_queryset(self, request, username, *args, **kwargs):
         queryset = UserAccount.objects.all()

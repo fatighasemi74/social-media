@@ -73,14 +73,16 @@ class LikeCreateAPIView(CreateAPIView):
     def perform_create(self, serializer):
         user = self.request.user.id
         useraccount = UserAccount.objects.filter(username_id=user).first()
-        data = serializer.validated_data
-        owner = data['post'].user
-        if Relation.objects.filter(from_user=useraccount, to_user=owner).exists() or useraccount == owner:
-            serializer.save(user=useraccount)
-            return serializer.data
-        else:
-            content = {'message': 'you cant like'}
-            return Response(content, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save(user=useraccount)
+        return serializer.data
+        # data = serializer.validated_data
+        # owner = data['post'].user
+        # if Relation.objects.filter(from_user=useraccount, to_user=owner).exists() or useraccount == owner:
+        #     serializer.save(user=useraccount)
+        #     return serializer.data
+        # else:
+        #     content = {'message': 'you cant like'}
+        #     return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
 class LiketListAPIView(ListAPIView):
     queryset = Like.objects.all()
@@ -99,9 +101,6 @@ class DeleteLikeAPIView(DestroyAPIView):
         log_in = UserAccount.objects.get(username=request.user)
         like = Like.objects.filter(user=log_in, post=post).first()
         if like:
-
-        # if like.user == log_in:
-        #     self.destroy(request, *args, **kwargs)
             like.delete()
             content = {'message': 'deleted'}
             return Response(content,status=status.HTTP_200_OK)
