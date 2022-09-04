@@ -230,7 +230,7 @@ class ExploreAPIView(generics.ListAPIView):
     def get_queryset(self):
         username = self.request.user
         user = UserAccount.objects.filter(name=username).first()
-        relations = Relation.objects.filter(from_user=user.id).all()
+        relations = Relation.objects.exclude(from_user=user.id).all()
         for relation in relations:
             post = Post.objects.filter(user=relation.to_user)
             return post
