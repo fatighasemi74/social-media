@@ -163,3 +163,8 @@ class DeleteUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = "__all__"
+
+class MiniProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserAccount
+        fields = ('name', 'profile_picture')

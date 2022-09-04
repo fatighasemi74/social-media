@@ -17,6 +17,7 @@ urlpatterns = [
     # path('verify-token/', TokenVerifyView.as_view(), name='token_verify'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('profile/<str:username>/', ProfileViewSet.as_view({'get': 'get_queryset'}), name='profile'),
+    path('mini_profile/<str:username>/', ProfileViewSet.as_view({'get': 'get_queryset_mini'}), name='mini_profile'),
     path('edit_profile/<str:username>/', EditProfileView.as_view(), name='edit-profile'),
     path('change_password/<int:pk>/', ChangePasswordView.as_view(), name='change_password'),
     path('delete_account/<int:pk>/', DeleteUserAPIView.as_view(), name='delete_account'),

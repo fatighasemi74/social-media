@@ -20,7 +20,7 @@ import jwt
 
 from .models import UserAccount
 from .serializers import UserAccountCreateSerializer, MyTokenObtainPairSerializer,\
-    ProfileSerializer, EditProfileSerializer, ChangePasswordSerializer, DeleteUserSerializer
+    ProfileSerializer, EditProfileSerializer, ChangePasswordSerializer, DeleteUserSerializer, MiniProfileSerializer
 from content.models import Post
 from relation.models import Relation
 from relation.permissions import RelationExists
@@ -139,6 +139,11 @@ class ProfileViewSet(viewsets.ViewSet):
         serializer = ProfileSerializer(user)
         return Response(serializer.data)
 
+    def get_queryset_mini(self, request, username, *args, **kwargs):
+        queryset = UserAccount.objects.all()
+        user = get_object_or_404(queryset, **{'name':username})
+        serializer = MiniProfileSerializer(user)
+        return Response(serializer.data)
 
 class EditProfileView(generics.UpdateAPIView):
     '''
