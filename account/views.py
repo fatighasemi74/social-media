@@ -24,7 +24,7 @@ from .serializers import UserAccountCreateSerializer, MyTokenObtainPairSerialize
 from content.models import Post
 from relation.models import Relation
 from relation.permissions import RelationExists
-from content.serializers import PostDetailSerializer, PostListSerializer
+from content.serializers import PostListSerializer
 
 
 #new functions:

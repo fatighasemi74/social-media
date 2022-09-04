@@ -38,6 +38,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
     comments = serializers.SerializerMethodField()
     likes = serializers.SerializerMethodField()
 
+
     class Meta:
         model = Post
         fields = ('id','title',  'caption', 'user', 'image', 'user_image', 'comments', 'likes', 'created_time')

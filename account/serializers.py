@@ -75,27 +75,29 @@ class UserAccountCreateSerializer(serializers.ModelSerializer):
         return  useraccount
 
 class ProfileSerializer(serializers.ModelSerializer):
-    follower = serializers.SerializerMethodField()
-    following = serializers.SerializerMethodField()
+    # follower = serializers.SerializerMethodField()
+    # following = serializers.SerializerMethodField()
     date_joined = serializers.SerializerMethodField('get_date_joined')
     # user_image = serializers.ImageField(source='follower.profile_picture')
+    followers_count = serializers.IntegerField(source='follewrs.count', read_only=True)
+    followings_count = serializers.IntegerField(source='followings.count', read_only=True)
 
     class Meta:
         model = UserAccount
         fields = ('id', 'name','email', 'date_joined',
-                  'profile_picture', 'birth_date', 'bio', 'follower', 'following')
+                  'profile_picture', 'bio', 'followers_count', 'followings_count')
     def get_date_joined(self, obj):
         date_joined = obj.username.date_joined
         return date_joined.strftime('%Y-%m-%d')
 
-    def get_follower(self, obj):
-        serializer = RelationListSerializer(obj.follewrs.all(), many=True)
-        return serializer.data[0]['from_user']
+    # def get_follower(self, obj):
+    #     serializer = RelationListSerializer(obj.follewrs.all(), many=True)
+    #     return serializer.data[0]['from_user']
 
-    def get_following(self, obj):
-        serializer = RelationListSerializer(obj.followings.all(), many=True)
-        # print(serializer.data[0]['to_user'])
-        return serializer.data[0]['to_user']
+    # def get_following(self, obj):
+    #     serializer = RelationListSerializer(obj.followings.all(), many=True)
+    #     # print(serializer.data[0]['to_user'])
+    #     return serializer.data[0]['to_user']
 
 class EditProfileSerializer(serializers.ModelSerializer):
 
