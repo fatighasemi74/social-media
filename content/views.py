@@ -53,8 +53,6 @@ class PostEditAPIView(generics.UpdateAPIView):
     def put(self, request, pk, *args, **kwargs):
         post = get_object_or_404(Post, **{'pk': pk})
         log_in = UserAccount.objects.get(username=request.user)
-        print(post.user)
-        print(log_in)
         if post.user == log_in:
 
             serializer = EditPostSerializer(post)

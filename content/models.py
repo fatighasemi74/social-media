@@ -15,7 +15,7 @@ class BaseModel(models.Model):
 class Post(BaseModel):
      caption = models.TextField(blank=True, null=True, max_length=1000)
      user = models.ForeignKey(UserAccount, related_name='posts', on_delete=models.CASCADE)
-     title = models.CharField(max_length=80, default='')
+     title = models.CharField(max_length=80, default='', blank=True, null=True)
      image = models.ImageField(upload_to='content/media', null=True, blank=True, validators=[FileExtensionValidator(allowed_extensions=['jpg', 'png', 'jpeg'])], default='data/account/media/defaultpost.jpeg')
      # created_time = models.DateTimeField("created time", auto_now_add=True)
 

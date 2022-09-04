@@ -130,7 +130,7 @@ class LogoutView(APIView):
 
 
 class ProfileViewSet(viewsets.ViewSet):
-    serializer_class = ProfileSerializer
+    # serializer_class = ProfileSerializer
     permission_classes = (IsAuthenticated, )#RelationExists)
 
     def get_queryset(self, request, username, *args, **kwargs):
@@ -221,3 +221,16 @@ class FollowingPostsAPIView(generics.ListAPIView):
             post = Post.objects.filter(user=relation.to_user)
             return post
 
+class ExploreAPIView(generics.ListAPIView):
+
+    permission_classes = (IsAuthenticated, )
+    serializer_class = PostListSerializer
+    queryset = UserAccount.objects.all()
+
+    def get_queryset(self):
+        username = self.request.user
+        user = UserAccount.objects.filter(name=username).first()
+        relations = Relation.objects.filter(from_user=user.id).all()
+        for relation in relations:
+            post = Post.objects.filter(user=relation.to_user)
+            return post
