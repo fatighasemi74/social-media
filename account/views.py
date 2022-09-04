@@ -22,7 +22,9 @@ from .models import UserAccount
 from .serializers import UserAccountCreateSerializer, MyTokenObtainPairSerializer,\
     ProfileSerializer, EditProfileSerializer, ChangePasswordSerializer, DeleteUserSerializer
 from content.models import Post
+from relation.models import Relation
 from relation.permissions import RelationExists
+from content.serializers import PostDetailSerializer, PostListSerializer
 
 
 #new functions:
@@ -183,7 +185,7 @@ class ChangePasswordView(generics.UpdateAPIView):
             return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
 
-class DeletePosAPIView(generics.DestroyAPIView):
+class DeleteUserAPIView(generics.DestroyAPIView):
     permission_classes = (IsAuthenticated, )
     serializer_class = DeleteUserSerializer
     queryset = UserAccount.objects.all()
@@ -199,3 +201,18 @@ class DeletePosAPIView(generics.DestroyAPIView):
         else:
             content = {'message': 'you cant delete'}
             return Response(content,status=status.HTTP_400_BAD_REQUEST)
+
+class FollowingPostsAPIView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = PostListSerializer
+    queryset = UserAccount.objects.all()
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        username = self.request.user
+        user = UserAccount.objects.filter(name=username).first()
+        relations = Relation.objects.filter(from_user=user.id).all()
+        for relation in relations:
+            post = Post.objects.filter(user=relation.to_user)
+            return post
+

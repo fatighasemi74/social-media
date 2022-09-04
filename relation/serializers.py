@@ -14,13 +14,6 @@ class CreateOrDeleteRelationSerializer(serializers.ModelSerializer):
         model = Relation
         fields = ("to_user",)
 
-    # def validate
-    # def get_to_user(self, obj):
-    #     user_id = self.request.user.id
-    #     # to_user = UserAccount.objects.filter(user=obj.to_user).first()
-    #     print(self.obj)
-    #     return user_id
-
 
 class RelationListSerializer(serializers.ModelSerializer):
 
