@@ -11,6 +11,7 @@ class UserAccount(models.Model):
     bio = models.TextField(blank=True, null= True)
     email = models.EmailField(max_length=254, unique=True, null=True, blank=True)
     birth_date = models.DateField(null=True, blank=True)
+    allowed = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = 'userAccount'

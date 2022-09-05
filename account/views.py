@@ -12,6 +12,8 @@ from rest_framework import viewsets
 from rest_framework import status, generics
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
 
 
 from django.contrib.auth.models import User
@@ -64,27 +66,33 @@ class LoginView(APIView):
         username = data.get('username', None)
         password = data.get('password', None)
         user = authenticate(username=username, password=password)
-
+        useraccount = UserAccount.objects.filter(username=user).first()
+        # print(useraccount.allowed)
         if user is not None:
-            if user.is_active:
-                username = data.get('username', None)
-                data = get_tokens_for_user(user)
-                data['username'] = username
-                # print(data['refresh'])
-                response.set_cookie(
-                    key = settings.SIMPLE_JWT['AUTH_COOKIE'],
-                    value = data["refresh"],
-                    expires = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
-                    secure = settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
-                    httponly = settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
-                    samesite = settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
-                )
-                csrf.get_token(request)
-                # print(data['access'])
-                response.data = {"Success" : "Login successfully","data":data['access']}
-                return response
+            if useraccount.allowed:
+                if user.is_active:
+
+                    username = data.get('username', None)
+                    data = get_tokens_for_user(user)
+                    data['username'] = username
+                    # print(data['refresh'])
+                    response.set_cookie(
+                        key = settings.SIMPLE_JWT['AUTH_COOKIE'],
+                        value = data["refresh"],
+                        expires = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
+                        secure = settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+                        httponly = settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+                        samesite = settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
+                    )
+                    csrf.get_token(request)
+                    # print(data['access'])
+                    response.data = {"Success" : "Login successfully","data":data['access']}
+                    return response
+                else:
+                    return Response({"No active" : "This account is not active!!"}, status=status.HTTP_404_NOT_FOUND)
             else:
-                return Response({"No active" : "This account is not active!!"}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"No active": "This account is not allowed!!"}, status=status.HTTP_404_NOT_FOUND)
+
         else:
             return Response({"Invalid" : "Invalid username or password!!"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -96,7 +104,19 @@ class UserCreateAPIView(CreateAPIView):
     serializer_class = UserAccountCreateSerializer
 
     def perform_create(self, serializer):
+        # template = render_to_string('account/templates/email_template.html', {'name': self.request.user})
+
         serializer.save(user=self.request.user)
+        
+        email = EmailMessage(
+            'subject',
+            'template',
+            settings.EMAIL_HOST_USER,
+            # [self.request.user.email],
+            ['faateme.ghasemii@gmail.com'],
+        )
+        email.fail_silently=False
+        email.send()
 
         # name = serializer.data['name']
         # subject = 'welcome to our website!!'

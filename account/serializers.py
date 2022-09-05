@@ -71,6 +71,7 @@ class UserAccountCreateSerializer(serializers.ModelSerializer):
                                                  birth_date=validated_data['birth_date'],
                                                  bio=validated_data['bio'])
         useraccount.username = user
+        # print(useraccount.allowed)
         useraccount.save()
         return  useraccount
 
