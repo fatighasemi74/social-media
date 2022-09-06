@@ -8,6 +8,7 @@ from rest_framework import viewsets
 
 
 from account.models import UserAccount
+from content.views import Pagination
 from .models import Relation
 from .serializers import CreateOrDeleteRelationSerializer, RelationListSerializer,\
     FollowingListSerializer, FollowerListSerializer
@@ -24,7 +25,7 @@ class CreateRelationAPIView(CreateAPIView):
 
 class RelationListAPIView(ListAPIView):
     queryset = Relation.objects.all()
-
+    pagination_class = Pagination
     serializer_class = RelationListSerializer
     permission_classes = (IsAuthenticated, )
 
@@ -54,6 +55,7 @@ class FollowingAPIView(ListAPIView):
     serializer_class = FollowingListSerializer
     permission_classes = (IsAuthenticated, )
     queryset = Relation.objects.all()
+    pagination_class = Pagination
     lookup_url_kwarg = 'username'
 
 
@@ -67,6 +69,7 @@ class FollowerAPIView(ListAPIView):
     serializer_class = FollowerListSerializer
     permission_classes = (IsAuthenticated, )
     queryset = Relation.objects.all()
+    pagination_class = Pagination
     lookup_url_kwarg = 'username'
 
 

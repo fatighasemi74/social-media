@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
+from rest_framework import pagination
 
 from django.http import QueryDict
 
@@ -17,6 +18,10 @@ from content.serializers import PostListSerializer, PostDetailSerializer,\
 from account.models import UserAccount
 
 from relation.permissions import RelationExists, HasPostPermission
+
+
+class Pagination(pagination.PageNumberPagination):
+    page_size = 5
 
 class PostCreateAPIView(generics.CreateAPIView):
 
@@ -108,12 +113,13 @@ class UserPostReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = PostDetailSerializer
     permission_classes = (IsAuthenticated, )
     queryset = Post.objects.all()
+    pagination_class = Pagination
     lookup_url_kwarg = 'username'
     lookup_field = 'pk'
 
-    pagination_class = PageNumberPagination
-    page_size = 2
-    pagination_class.page_size = page_size
+    # pagination_class = PageNumberPagination
+    # page_size = 2
+    # pagination_class.page_size = page_size
 
     def get_queryset(self):
         qs = super().get_queryset()
