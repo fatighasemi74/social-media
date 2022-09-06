@@ -11,10 +11,15 @@ from django.contrib.auth import logout
 from rest_framework import viewsets
 from rest_framework import status, generics
 from django.shortcuts import get_object_or_404
+from django.views import View
+from django.shortcuts import redirect
 from django.core.mail import send_mail
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
-
+from django.utils.encoding import force_bytes, force_str, DjangoUnicodeDecodeError
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.contrib.sites.shortcuts import get_current_site
+from django.urls import reverse
 
 from django.contrib.auth.models import User
 
@@ -107,25 +112,36 @@ class UserCreateAPIView(CreateAPIView):
         # template = render_to_string('account/templates/email_template.html', {'name': self.request.user})
 
         serializer.save(user=self.request.user)
-        
+        # print(serializer.data['name'])
+        # username = force_bytes(urlsafe_base64_encode(serializer.data['name']))
+        username = serializer.data['name']
+        # print(username)
+        domain = get_current_site(self.request).domain
+        # print(serializer.data['email'])
+        # print(domain)
+        link = reverse('activate', kwargs={'username': username})
+        activate_url = 'http://'+domain+link
+        email_body = 'hii '+username+' please this link:\n' + activate_url
         email = EmailMessage(
             'subject',
-            'template',
+            email_body,
             settings.EMAIL_HOST_USER,
             # [self.request.user.email],
-            ['faateme.ghasemii@gmail.com'],
+            [serializer.data['email']],
         )
         email.fail_silently=False
         email.send()
 
-        # name = serializer.data['name']
-        # subject = 'welcome to our website!!'
-        # message = f'Hi {name}, thank you for registering in here.'
-        # email_form = settings.EMAIL_HOST_USER
-        # recipient_list = [serializer.data['email'], ]
-        # send_mail( subject, message, email_form, recipient_list, fail_silently=False)
-        # print(serializer.data)
-
+class VerificationView(View):
+        def get(self, request, username):
+            user = UserAccount.objects.filter(name=username).first()
+            # print(user.allowed)
+            user.allowed = True
+            # print(user.allowed)
+            user.save()
+            return redirect('login')
+            # response = {"Success": "now you can login successfully"}
+            # return Response(status=status.HTTP_200_OK )
 
 
 

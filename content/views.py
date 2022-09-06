@@ -111,6 +111,9 @@ class UserPostReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
     lookup_url_kwarg = 'username'
     lookup_field = 'pk'
 
+    pagination_class = PageNumberPagination
+    page_size = 2
+    pagination_class.page_size = page_size
 
     def get_queryset(self):
         qs = super().get_queryset()

@@ -31,10 +31,11 @@ class CommentRepliesListSerializer(serializers.ModelSerializer):
 
 class CommentListSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username')
+    user_image = serializers.ImageField(source='user.profile_picture')
     replies = serializers.SerializerMethodField()
     class Meta:
         model = Comment
-        fields = ('id', 'caption', 'user', 'replies')
+        fields = ('id', 'caption', 'user', 'replies', 'created_time', 'user_image')
 
     def get_replies(self, obj):
         qs = obj.replies.all()
