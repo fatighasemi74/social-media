@@ -12,6 +12,9 @@ class UserAccount(models.Model):
     email = models.EmailField(max_length=254, unique=True, null=True, blank=True)
     birth_date = models.DateField(null=True, blank=True)
     allowed = models.BooleanField(default=False)
+    is_following = models.BooleanField(default=False)
+
+
 
     class Meta:
         verbose_name = 'userAccount'

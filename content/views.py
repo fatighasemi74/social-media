@@ -21,7 +21,7 @@ from relation.permissions import RelationExists, HasPostPermission
 
 
 class Pagination(pagination.PageNumberPagination):
-    page_size = 5
+    page_size = 2
 
 class PostCreateAPIView(generics.CreateAPIView):
 
@@ -39,7 +39,7 @@ class PostCreateAPIView(generics.CreateAPIView):
 
 class PostListAPIView(generics.ListAPIView):
     queryset = Post.objects.all()
-
+    pagination_class = Pagination
     serializer_class = PostListSerializer
     permission_classes = (IsAuthenticated, )
 

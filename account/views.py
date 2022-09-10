@@ -25,6 +25,7 @@ from django.contrib.auth.models import User
 
 import jwt
 
+from content.views import Pagination
 from .models import UserAccount
 from .serializers import UserAccountCreateSerializer, MyTokenObtainPairSerializer,\
     ProfileSerializer, EditProfileSerializer, ChangePasswordSerializer, DeleteUserSerializer, MiniProfileSerializer
@@ -32,6 +33,7 @@ from content.models import Post
 from relation.models import Relation
 from relation.permissions import RelationExists
 from content.serializers import PostListSerializer
+from .functions import get_access_token
 
 
 #new functions:
@@ -170,14 +172,35 @@ class ProfileViewSet(viewsets.ViewSet):
     permission_classes = (IsAuthenticated, )#RelationExists)
 
     def get_queryset(self, request, username, *args, **kwargs):
+        mainuser = User.objects.filter(username=request.user).first()
+        log_in = UserAccount.objects.filter(username=mainuser).first()
         queryset = UserAccount.objects.all()
         user = get_object_or_404(queryset, **{'name':username})
+        # print(user.is_following)
+        if Relation.objects.filter(from_user=log_in, to_user=user).exists():
+            user.is_following = True
+            user.save()
+        else:
+            user.is_following = False
+            user.save()
         serializer = ProfileSerializer(user)
+        # print(user.is_following)
+
         return Response(serializer.data)
 
+
     def get_queryset_mini(self, request, username, *args, **kwargs):
+        mainuser = User.objects.filter(username=request.user).first()
+        log_in = UserAccount.objects.filter(username=mainuser).first()
+
         queryset = UserAccount.objects.all()
         user = get_object_or_404(queryset, **{'name':username})
+        if Relation.objects.filter(from_user=log_in, to_user=user).exists():
+            user.is_following = True
+            user.save()
+        else:
+            user.is_following = False
+            user.save()
         serializer = MiniProfileSerializer(user)
         return Response(serializer.data)
 
@@ -246,6 +269,7 @@ class DeleteUserAPIView(generics.DestroyAPIView):
 class FollowingPostsAPIView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, )
     serializer_class = PostListSerializer
+    pagination_class = Pagination
     queryset = UserAccount.objects.all()
 
     def get_queryset(self):
@@ -258,7 +282,7 @@ class FollowingPostsAPIView(generics.ListAPIView):
             return post
 
 class ExploreAPIView(generics.ListAPIView):
-
+    pagination_class = Pagination
     permission_classes = (IsAuthenticated, )
     serializer_class = PostListSerializer
     queryset = UserAccount.objects.all()

@@ -8,6 +8,7 @@ from django.contrib.auth.hashers import make_password
 
 from .models import UserAccount
 from relation.serializers import RelationListSerializer
+from .functions import get_access_token
 from django.contrib.auth.models import User
 
 
@@ -82,14 +83,21 @@ class ProfileSerializer(serializers.ModelSerializer):
     # user_image = serializers.ImageField(source='follower.profile_picture')
     followers_count = serializers.IntegerField(source='follewrs.count', read_only=True)
     followings_count = serializers.IntegerField(source='followings.count', read_only=True)
+    # is_followed = serializers.SerializerMethodField('get_is_followed')
+
+
 
     class Meta:
         model = UserAccount
         fields = ('id', 'name','email', 'date_joined',
-                  'profile_picture', 'bio', 'followers_count', 'followings_count')
+                  'profile_picture', 'bio', 'followers_count', 'followings_count', 'birth_date', 'is_following')
     def get_date_joined(self, obj):
         date_joined = obj.username.date_joined
         return date_joined.strftime('%Y-%m-%d')
+
+    # def get_is_followed(self, obj):
+    #     get_access_token(self.context['request'])
+    #     print(obj, 'hiiii obj')
 
     # def get_follower(self, obj):
     #     serializer = RelationListSerializer(obj.follewrs.all(), many=True)
@@ -168,4 +176,4 @@ class DeleteUserSerializer(serializers.ModelSerializer):
 class MiniProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserAccount
-        fields = ('name', 'profile_picture')
+        fields = ('name', 'profile_picture', 'is_following')

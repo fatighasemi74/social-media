@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 
-
+from content.views import Pagination
 from .models import Comment, Like
 from .serializers import CommentCreateSerializer, CommentListSerializer, CommentUpdateSerializer,\
     LikeCreateSerializer, LikeListSerializer
@@ -30,11 +30,13 @@ class CommentCreateAPIView(CreateAPIView):
 class CommentListAPIView(ListAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentListSerializer
+    pagination_class = Pagination
     permission_classes = (IsAuthenticated, )
 
 class CommentRetrieveAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentListSerializer
+    pagination_class = Pagination
     permission_classes = (IsAuthenticated, )
 
     def get_serializer_class(self):
@@ -87,6 +89,7 @@ class LikeCreateAPIView(CreateAPIView):
 class LiketListAPIView(ListAPIView):
     queryset = Like.objects.all()
     serializer_class = LikeListSerializer
+    pagination_class = Pagination
     permission_classes = (IsAuthenticated, )
 
 class DeleteLikeAPIView(DestroyAPIView):

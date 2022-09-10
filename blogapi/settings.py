@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 
+import dropbox
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -47,8 +48,11 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'rest_framework.authentication',
+    'rest_framework_api_key',
 
     "corsheaders",
+
+    'storages',
 
     'account',
     'content',
@@ -56,6 +60,12 @@ INSTALLED_APPS = [
     'relation',
 
 ]
+DEFAULT_FILE_STORAGE = 'storages.backends.dropbox.DropBoxStorage'
+DROPBOX_OAUTH2_TOKEN = "sl.BPAhws5H7gY24gT-SlaSbLye0HAiWLrJKSasIglY18Luiyv9cynwQG-OMOgU5Y0Gn0r1wfiIZQaCTA5SE1eeIvrXVaH20p4IXytx582Zom-IKdnonCQEoSFcvUc8vrNXIyaTXtY"
+DROPBOX_ROOT_PATH    = '/'
+DROPBOX_APP_KEY = 'h1gh1vqlt5v4deh'
+DROPBOX_APP_SECRET = '3u9vni1v0atajea'
+
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
