@@ -21,7 +21,7 @@ from relation.permissions import RelationExists, HasPostPermission
 
 
 class Pagination(pagination.PageNumberPagination):
-    page_size = 2
+    page_size = 5
 
 class PostCreateAPIView(generics.CreateAPIView):
 
