@@ -111,16 +111,9 @@ class UserCreateAPIView(CreateAPIView):
     serializer_class = UserAccountCreateSerializer
 
     def perform_create(self, serializer):
-        # template = render_to_string('account/templates/email_template.html', {'name': self.request.user})
-
         serializer.save(user=self.request.user)
-        # print(serializer.data['name'])
-        # username = force_bytes(urlsafe_base64_encode(serializer.data['name']))
         username = serializer.data['name']
-        # print(username)
         domain = get_current_site(self.request).domain
-        # print(serializer.data['email'])
-        # print(domain)
         link = reverse('activate', kwargs={'username': username})
         activate_url = 'http://'+domain+link
         email_body = 'hii '+username+' please this link:\n' + activate_url
@@ -128,7 +121,6 @@ class UserCreateAPIView(CreateAPIView):
             'subject',
             email_body,
             settings.EMAIL_HOST_USER,
-            # [self.request.user.email],
             [serializer.data['email']],
         )
         email.fail_silently=False
@@ -137,14 +129,9 @@ class UserCreateAPIView(CreateAPIView):
 class VerificationView(View):
         def get(self, request, username):
             user = UserAccount.objects.filter(name=username).first()
-            # print(user.allowed)
             user.allowed = True
-            # print(user.allowed)
             user.save()
             return redirect('login')
-            # response = {"Success": "now you can login successfully"}
-            # return Response(status=status.HTTP_200_OK )
-
 
 
 class LogoutView(APIView):
@@ -167,8 +154,8 @@ class LogoutView(APIView):
 
 
 
-class ProfileViewSet(viewsets.ViewSet):
-    # serializer_class = ProfileSerializer
+class ProfileViewSet(viewsets.ModelViewSet):
+    # lookup_url_kwarg = 'username'
     permission_classes = (IsAuthenticated, )#RelationExists)
 
     def get_queryset(self, request, username, *args, **kwargs):
@@ -176,7 +163,6 @@ class ProfileViewSet(viewsets.ViewSet):
         log_in = UserAccount.objects.filter(username=mainuser).first()
         queryset = UserAccount.objects.all()
         user = get_object_or_404(queryset, **{'name':username})
-        # print(user.is_following)
         if Relation.objects.filter(from_user=log_in, to_user=user).exists():
             user.is_following = True
             user.save()
@@ -184,8 +170,6 @@ class ProfileViewSet(viewsets.ViewSet):
             user.is_following = False
             user.save()
         serializer = ProfileSerializer(user)
-        # print(user.is_following)
-
         return Response(serializer.data)
 
 
@@ -204,6 +188,22 @@ class ProfileViewSet(viewsets.ViewSet):
         serializer = MiniProfileSerializer(user)
         return Response(serializer.data)
 
+    def update(self, request, *args, **kwargs):
+        print(kwargs)
+        # queryset = UserAccount.objects.all()
+        log_in = UserAccount.objects.filter(username=request.user).first()
+        # user = get_object_or_404(queryset, **{'name':kwargs['username']})
+        user = UserAccount.objects.filter(name=kwargs['username']).first()
+
+        if user == log_in:
+            serializer = EditProfileSerializer(user)
+            # print(serializer.data)
+            self.update(request, *args, **kwargs)
+            return Response(serializer.data)
+        else:
+            content = {'message': 'this is not your profile'}
+            return Response(content,status=status.HTTP_400_BAD_REQUEST)
+
 class EditProfileView(generics.UpdateAPIView):
     '''
         owner profile must be edited
@@ -211,6 +211,7 @@ class EditProfileView(generics.UpdateAPIView):
     permission_classes = (IsAuthenticated, )
     serializer_class = EditProfileSerializer
     queryset = UserAccount.objects.all()
+    lookup_url_kwarg = 'username'
 
 
 
@@ -218,10 +219,11 @@ class EditProfileView(generics.UpdateAPIView):
         queryset = UserAccount.objects.all()
         log_in = UserAccount.objects.get(username=request.user)
         user = get_object_or_404(queryset, **{'name':username})
-
+        print(log_in, 'login')
+        print(user, 'user')
         if user == log_in:
             serializer = EditProfileSerializer(user)
-            print(serializer.data)
+            # print(serializer.data)
             return self.update(request, *args, **kwargs)
         else:
             content = {'message': 'this is not your profile'}
