@@ -223,7 +223,7 @@ class EditProfileView(generics.UpdateAPIView):
         print(user, 'user')
         if user == log_in:
             serializer = EditProfileSerializer(user)
-            # print(serializer.data)
+            print(serializer.data)
             return self.update(request, *args, **kwargs)
         else:
             content = {'message': 'this is not your profile'}

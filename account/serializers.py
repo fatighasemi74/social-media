@@ -114,10 +114,8 @@ class EditProfileSerializer(serializers.ModelSerializer):
         model = UserAccount
         fields = ('name',  'profile_picture', 'birth_date', 'bio')
 
-
-
     def update(self, instance, validated_data):
-
+        print(validated_data)
         if validated_data['name']:
             instance.name = validated_data['name']
         if validated_data['profile_picture']:

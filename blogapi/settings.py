@@ -19,7 +19,16 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 # BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
+dx = {
+    "access_token": "sl.BPHvgDVIMTOBPJRbKX0CvdCOyTcx_Vk7AqwwYXqYmbZrdfh1aH7LCG8peLEebVvOEgM_7yK_xx6xbk8XiqEh7UNnBDT0s9SV2hUOgmBvkZFikk89xS1e_8nNosMQkLcftjCQWas",
+    "token_type": "bearer",
+    "expires_in": 14400,
+    "refresh_token": "I0uK5UQExmkAAAAAAAAAASM_e3i7YhOs-fusmUpJlNr5bECPKikND_GWA8nWjNka",
+    "scope": "account_info.read files.content.read files.content.write files.metadata.read files.metadata.write",
+    "uid": "1387129185",
+    "account_id": "dbid:AAAlCjPw1qz_ZGqhpTh23nxeGpfAA5--YFA"
+}
+dbx = dropbox.Dropbox(app_key = "h1gh1vqlt5v4deh", app_secret = "3u9vni1v0atajea", oauth2_refresh_token = dx)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -61,7 +70,7 @@ INSTALLED_APPS = [
 
 ]
 DEFAULT_FILE_STORAGE = 'storages.backends.dropbox.DropBoxStorage'
-DROPBOX_OAUTH2_TOKEN = "sl.BPFQDwLeymPHZz998nORduvam28FDjDc4XecJm0RwrtR3KL9P4wH1iWvFd3DT4GiHF1719iuDxH2K6YwY7Qp_6rqvR6wmXmP_J6khS-g1feko0qxmJIP_IclisxjbyF9q9DPsDE"
+DROPBOX_OAUTH2_TOKEN = "sl.BPEO4yEjDMUUS9xd9i3RHi14CI4r6sYMFBc8-isPTXaqOy98otjDd8w9zoEVUNETZ8IkaxUiGDWzowlsNOp4K8FoGMzxEBwiLrTFg-51LKM9WSN0phTB-rSOweNCFTuFYi69Da0"
 DROPBOX_ROOT_PATH    = '/'
 DROPBOX_APP_KEY = 'h1gh1vqlt5v4deh'
 DROPBOX_APP_SECRET = '3u9vni1v0atajea'
