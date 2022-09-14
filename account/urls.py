@@ -1,29 +1,25 @@
-from django.urls import path
-from rest_framework_simplejwt.views import TokenObtainPairView, \
-    TokenRefreshView, TokenVerifyView
+from django.urls import path, include
+from rest_framework import routers
+
 
 
 from .views import UserCreateAPIView, LogoutView, \
-    LoginView, ProfileViewSet, EditProfileView,\
-    ChangePasswordView, MyTokenObtainPairView, RefreshTokenAPIView,\
-    DeleteUserAPIView, FollowingPostsAPIView, ExploreAPIView, VerificationView
+    LoginView, ProfileViewSet, RefreshTokenAPIView,\
+    FollowingPostsAPIView, ExploreAPIView, VerificationView
+
+
+router = routers.SimpleRouter()
+router.register('profile', ProfileViewSet, basename='profile')
 
 urlpatterns = [
+    path('', include(router.urls)),
+
     path('create/', UserCreateAPIView.as_view(), name='account-create'),
-    # path('refresh/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    # path('refresh/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('login/', LoginView.as_view(), name='login'),
     path('refresh-token/', RefreshTokenAPIView.as_view(), name='token_refresh'),
-    # path('verify-token/', TokenVerifyView.as_view(), name='token_verify'),
     path('logout/', LogoutView.as_view(), name='logout'),
-    path('profile/<str:username>/', ProfileViewSet.as_view({'get': 'get_queryset'}), name='profile'),
-    path('mini_profile/<str:username>/', ProfileViewSet.as_view({'get': 'get_queryset_mini'}), name='mini_profile'),
-    path('edit_profile/<str:username>/', EditProfileView.as_view(), name='edit-profile'),
-    path('change_password/<int:pk>/', ChangePasswordView.as_view(), name='change_password'),
-    path('delete_account/<int:pk>/', DeleteUserAPIView.as_view(), name='delete_account'),
     path('home/', FollowingPostsAPIView.as_view(), name='home'),
     path('explore/', ExploreAPIView.as_view(), name='home'),
     path('activate/<str:username>/', VerificationView.as_view(), name='activate'),
-
 
 ]

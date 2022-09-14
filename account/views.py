@@ -1,39 +1,31 @@
 from rest_framework.generics import  CreateAPIView
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken , AccessToken
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 from django.middleware import csrf
 from django.contrib.auth import authenticate
 from django.conf import settings
-from django.contrib.auth import logout
 from rest_framework import viewsets
 from rest_framework import status, generics
 from django.shortcuts import get_object_or_404
 from django.views import View
 from django.shortcuts import redirect
-from django.core.mail import send_mail
 from django.core.mail import EmailMessage
-from django.template.loader import render_to_string
-from django.utils.encoding import force_bytes, force_str, DjangoUnicodeDecodeError
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
-
-from django.contrib.auth.models import User
-
 import jwt
+from django.contrib.auth.models import User
 
 from content.views import Pagination
 from .models import UserAccount
 from .serializers import UserAccountCreateSerializer, MyTokenObtainPairSerializer,\
-    ProfileSerializer, EditProfileSerializer, ChangePasswordSerializer, DeleteUserSerializer, MiniProfileSerializer
+    ProfileSerializer
 from content.models import Post
 from relation.models import Relation
-from relation.permissions import RelationExists
 from content.serializers import PostListSerializer
-from .functions import get_access_token
 
 
 #new functions:
@@ -155,118 +147,80 @@ class LogoutView(APIView):
 
 
 class ProfileViewSet(viewsets.ModelViewSet):
-    # lookup_url_kwarg = 'username'
-    permission_classes = (IsAuthenticated, )#RelationExists)
+    '''
+        this viewset works for list of users, user profile, edit profile, change password and for deleting account
+    '''
 
-    def get_queryset(self, request, username, *args, **kwargs):
-        mainuser = User.objects.filter(username=request.user).first()
-        log_in = UserAccount.objects.filter(username=mainuser).first()
-        queryset = UserAccount.objects.all()
-        user = get_object_or_404(queryset, **{'name':username})
-        if Relation.objects.filter(from_user=log_in, to_user=user).exists():
-            user.is_following = True
-            user.save()
-        else:
-            user.is_following = False
-            user.save()
-        serializer = ProfileSerializer(user)
-        return Response(serializer.data)
+    lookup_field = 'name'
+    serializer_class = ProfileSerializer
+    permission_classes = (IsAuthenticated, )
+    queryset = UserAccount.objects.all()
 
-
-    def get_queryset_mini(self, request, username, *args, **kwargs):
-        mainuser = User.objects.filter(username=request.user).first()
-        log_in = UserAccount.objects.filter(username=mainuser).first()
-
-        queryset = UserAccount.objects.all()
-        user = get_object_or_404(queryset, **{'name':username})
-        if Relation.objects.filter(from_user=log_in, to_user=user).exists():
-            user.is_following = True
-            user.save()
-        else:
-            user.is_following = False
-            user.save()
-        serializer = MiniProfileSerializer(user)
-        return Response(serializer.data)
+    def get_queryset(self, *args, **kwargs):
+        '''
+            list of users, user profile
+        '''
+        users = UserAccount.objects.all()
+        log_in = User.objects.get(username=self.request.user)
+        log_in_user = UserAccount.objects.filter(username=log_in.id).first()
+        if self.kwargs.get('name'):
+            user = UserAccount.objects.get(name=self.kwargs.get('name'))
+        return  users
 
     def update(self, request, *args, **kwargs):
-        print(kwargs)
-        # queryset = UserAccount.objects.all()
-        log_in = UserAccount.objects.filter(username=request.user).first()
-        # user = get_object_or_404(queryset, **{'name':kwargs['username']})
-        user = UserAccount.objects.filter(name=kwargs['username']).first()
+        '''
+            edit profile, change password
+        '''
+        log_in = UserAccount.objects.get(name=self.request.user)
+        if self.kwargs.get('name'):
+            user = UserAccount.objects.get(name=self.kwargs.get('name'))
+            if log_in == user:
+                instance = self.get_object()
+                if request.data.get('profile_picture'):
+                    instance.profile_picture = request.data.get('profile_picture')
+                    instance.save()
+                if request.data.get('bio'):
+                    instance.bio = request.data.get('bio')
+                    instance.save()
+                if request.data.get('birth_date'):
+                    instance.birth_date = request.data.get('birth_date')
+                    instance.save()
+                if request.data.get('old_password'):
+                    old_password = request.data.get('old_password')
+                    user = self.request.user
+                    if not user.check_password(old_password):
+                        raise ValidationError({"old_password": "Old password is not correct"})
+                    password = request.data.get('password')
+                    password2 = request.data.get('password2')
+                    if password == password2:
+                        user.set_password(password)
+                        user.save()
+                    else:
+                        raise ValidationError({"password": "password doesnt match"})
 
-        if user == log_in:
-            serializer = EditProfileSerializer(user)
-            # print(serializer.data)
-            self.update(request, *args, **kwargs)
-            return Response(serializer.data)
-        else:
-            content = {'message': 'this is not your profile'}
-            return Response(content,status=status.HTTP_400_BAD_REQUEST)
+                serializer = ProfileSerializer(instance)
+                return Response(serializer.data)
+            else:
+                content = {'message': 'this is not your profile'}
+                return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
-class EditProfileView(generics.UpdateAPIView):
-    '''
-        owner profile must be edited
-    '''
-    permission_classes = (IsAuthenticated, )
-    serializer_class = EditProfileSerializer
-    queryset = UserAccount.objects.all()
-    lookup_url_kwarg = 'username'
-
-
-
-    def put(self, request, username, *args, **kwargs):
-        queryset = UserAccount.objects.all()
-        log_in = UserAccount.objects.get(username=request.user)
-        user = get_object_or_404(queryset, **{'name':username})
-        print(log_in, 'login')
-        print(user, 'user')
-        if user == log_in:
-            serializer = EditProfileSerializer(user)
-            print(serializer.data)
-            return self.update(request, *args, **kwargs)
-        else:
-            content = {'message': 'this is not your profile'}
-            return Response(content,status=status.HTTP_400_BAD_REQUEST)
-
-
-class ChangePasswordView(generics.UpdateAPIView):
-
-    queryset = UserAccount.objects.all()
-    permission_classes = (IsAuthenticated,)
-    serializer_class = ChangePasswordSerializer
-
-
-    def put(self, request, pk, *args, **kwargs):
-        queryset = UserAccount.objects.all()
-        log_in = UserAccount.objects.get(username=request.user)
-        user = get_object_or_404(queryset, **{'pk': pk})
-        # print(log_in)
-        # print(user)
-        if user == log_in:
-            serializer = EditProfileSerializer(user)
-            return self.update(request, *args, **kwargs)
-        else:
-            content = {'message': 'you dont have the permission'}
-            return Response(content, status=status.HTTP_400_BAD_REQUEST)
+    def destroy(self, request, *args, **kwargs):
+        '''
+            delete account
+        '''
+        log_in = UserAccount.objects.get(name=self.request.user)
+        if self.kwargs.get('name'):
+            user = UserAccount.objects.get(name=self.kwargs.get('name'))
+            if log_in == user:
+                mainuser = User.objects.filter(username=user)
+                mainuser.delete()
+                content = {'message': 'delete'}
+                return Response(content, status=status.HTTP_200_OK)
+            else:
+                content = {'message': 'you cant delete'}
+                return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
 
-class DeleteUserAPIView(generics.DestroyAPIView):
-    permission_classes = (IsAuthenticated, )
-    serializer_class = DeleteUserSerializer
-    queryset = UserAccount.objects.all()
-
-    def delete(self, request, pk, *args, **kwargs):
-        queryset = User.objects.all()
-        log_in = User.objects.get(username=request.user)
-        user = get_object_or_404(queryset, **{'pk': pk})
-        print(log_in)
-        print(user)
-        if user == log_in:
-            return self.destroy(request, *args, **kwargs)
-        else:
-            content = {'message': 'you cant delete'}
-            return Response(content,status=status.HTTP_400_BAD_REQUEST)
 
 class FollowingPostsAPIView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, )

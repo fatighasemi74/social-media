@@ -56,6 +56,7 @@ class EditPostSerializer(serializers.ModelSerializer):
         model = Post
         fields = ('id','caption', 'title', 'image')
     def update(self, instance, validated_data):
+        print(validated_data)
         if validated_data['caption']:
             instance.caption = validated_data['caption']
         if validated_data['title']:
