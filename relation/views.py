@@ -29,7 +29,6 @@ class RelationListAPIView(ListAPIView):
     serializer_class = RelationListSerializer
     permission_classes = (IsAuthenticated, )
 
-    # def get_queryset(self):
 
 class DeleteRelationAPIView(DestroyAPIView):
     queryset = Relation.objects.all()

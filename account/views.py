@@ -20,11 +20,11 @@ import jwt
 from django.contrib.auth.models import User
 
 from content.views import Pagination
-from .models import UserAccount
+from .models import UserAccount, Relation
 from .serializers import UserAccountCreateSerializer, MyTokenObtainPairSerializer,\
-    ProfileSerializer
+    ProfileSerializer, CreateOrDeleteRelationSerializer
 from content.models import Post
-from relation.models import Relation
+# from relation.models import Relation
 from content.serializers import PostListSerializer
 
 
@@ -250,3 +250,39 @@ class ExploreAPIView(generics.ListAPIView):
         for relation in relations:
             post = Post.objects.filter(user=relation.to_user)
             return post
+
+
+class RelationViewSet(viewsets.ModelViewSet):
+    queryset = Relation.objects.all()
+    serializer_class = CreateOrDeleteRelationSerializer
+    permission_classes = [IsAuthenticated, ]
+    # lookup_field = 'to_user'
+
+
+    def get_queryset(self, *args, **kwargs):
+        '''
+            list of relations, home
+        '''
+        relations = Relation.objects.all()
+        return  relations
+
+    def create(self, request, *args, **kwargs):
+        print("hiii")
+        serializer = self.get_serializer(data=request.data)
+        print(serializer)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+    # def create(self, request, *args, **kwargs):
+    #     user = self.request.user
+    #     useraccount = UserAccount.objects.filter(name=user).first()
+    #     serializer = self.serializer_class
+    #     serializer(from_user=useraccount)
+    #     return Response(status=status.HTTP_200_OK)
+

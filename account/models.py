@@ -4,6 +4,14 @@ from blogapi import settings
 
 from django.contrib.auth.models import User
 
+
+class BaseModel(models.Model):
+    created_time = models.DateTimeField("created time", auto_now_add=True)
+    modified_time = models.DateTimeField("modified time", auto_now=True)
+
+    class Meta:
+        abstract = True
+
 class UserAccount(models.Model):
     username = models.OneToOneField(User, on_delete=models.CASCADE, null=True, related_name='user_account')
     name = models.CharField(max_length=200, null=True, blank=True)
@@ -23,11 +31,17 @@ class UserAccount(models.Model):
     def __str__(self):
         return self.name
 
-    # @property
-    # def default_picture(self):
-    #     if self.profile_picture:
-    #         return "{}{}".format(settings.MEDIA_URL, self.profile_picture)
-    #     return 'account/media/pic.jpeg'
 
+
+class Relation(BaseModel):
+    from_user = models.ForeignKey(UserAccount, related_name='followingss', on_delete=models.CASCADE)
+    to_user = models.ForeignKey(UserAccount, related_name='follewrss', on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'Relation'
+        verbose_name_plural = 'Relations'
+
+    def __str__(self):
+        return "{} >> {}".format(self.from_user.username, self.to_user.username)
 
 

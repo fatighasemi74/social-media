@@ -5,11 +5,12 @@ from rest_framework import routers
 
 from .views import UserCreateAPIView, LogoutView, \
     LoginView, ProfileViewSet, RefreshTokenAPIView,\
-    FollowingPostsAPIView, ExploreAPIView, VerificationView
+    FollowingPostsAPIView, ExploreAPIView, VerificationView, RelationViewSet
 
 
 router = routers.SimpleRouter()
 router.register('profile', ProfileViewSet, basename='profile')
+router.register('relation', RelationViewSet, basename='relation')
 
 urlpatterns = [
     path('', include(router.urls)),

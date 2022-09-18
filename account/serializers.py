@@ -6,7 +6,7 @@ from rest_framework_simplejwt.exceptions import InvalidToken
 from django.contrib.auth.hashers import make_password
 
 
-from .models import UserAccount
+from .models import UserAccount, Relation
 from relation.serializers import RelationListSerializer
 from .functions import get_access_token
 from django.contrib.auth.models import User
@@ -125,3 +125,21 @@ class MiniProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserAccount
         fields = ('name', 'profile_picture', 'is_following')
+
+class CreateOrDeleteRelationSerializer(serializers.ModelSerializer):
+
+    from_user = serializers.CharField(source='from_user.username')
+    to_user = serializers.CharField(source='to_user.username')
+
+    class Meta:
+        model = Relation
+        fields = ("to_user", "from_user",)
+
+    def create(self, validated_data):
+        validatedata_to_user = validated_data['to_user']
+        userto = validatedata_to_user['username']
+        to_user = UserAccount.objects.filter(name=userto).first()
+        validatedata_from_user = validated_data['from_user']
+        userfrom = validatedata_from_user['username']
+        from_user = UserAccount.objects.filter(name=userfrom).first()
+        return Relation.objects.create(from_user=from_user,to_user=to_user)
