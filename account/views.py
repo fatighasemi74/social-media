@@ -5,6 +5,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
+from rest_framework.decorators import action
 from django.middleware import csrf
 from django.contrib.auth import authenticate
 from django.conf import settings
@@ -247,8 +248,10 @@ class ProfileViewSet(viewsets.ModelViewSet):
                 return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-class FollowingPostsAPIView(generics.ListAPIView):
+class ListPostViewSet(viewsets.ModelViewSet):
+    '''
+        home page and explore, based on following people
+    '''
     permission_classes = (IsAuthenticated, )
     serializer_class = PostListSerializer
     pagination_class = Pagination
@@ -259,23 +262,19 @@ class FollowingPostsAPIView(generics.ListAPIView):
         username = self.request.user
         user = UserAccount.objects.filter(name=username).first()
         relations = Relation.objects.filter(from_user=user.id).all()
-        for relation in relations:
-            post = Post.objects.filter(user=relation.to_user)
-            return post
+        param = self.request.GET.get('route')
+        if param == "home":
+            print("homeeee")
+            for relation in relations:
+                post = Post.objects.filter(user=relation.to_user)
+                return post
+        elif param == "explore":
+            print("explore")
+            for relation in relations:
+                post = Post.objects.filter(user=relation.to_user)
+                return post
 
-class ExploreAPIView(generics.ListAPIView):
-    pagination_class = Pagination
-    permission_classes = (IsAuthenticated, )
-    serializer_class = PostListSerializer
-    queryset = UserAccount.objects.all()
 
-    def get_queryset(self):
-        username = self.request.user
-        user = UserAccount.objects.filter(name=username).first()
-        relations = Relation.objects.exclude(from_user=user.id).all()
-        for relation in relations:
-            post = Post.objects.filter(user=relation.to_user)
-            return post
 
 
 class RelationViewSet(viewsets.ModelViewSet):
@@ -327,6 +326,9 @@ class RelationViewSet(viewsets.ModelViewSet):
             return Response(content,status=status.HTTP_400_BAD_REQUEST)
 
 class FollowingAPIView(generics.ListAPIView):
+    '''
+        list of following users
+    '''
     serializer_class = FollowingListSerializer
     permission_classes = (IsAuthenticated, )
     queryset = Relation.objects.all()
@@ -341,6 +343,9 @@ class FollowingAPIView(generics.ListAPIView):
         return qs.filter(from_user=user.id)
 
 class FollowerAPIView(generics.ListAPIView):
+    '''
+        list of follower users
+    '''
     serializer_class = FollowerListSerializer
     permission_classes = (IsAuthenticated, )
     queryset = Relation.objects.all()
