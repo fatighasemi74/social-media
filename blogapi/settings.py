@@ -70,7 +70,7 @@ INSTALLED_APPS = [
 
 ]
 DEFAULT_FILE_STORAGE = 'storages.backends.dropbox.DropBoxStorage'
-DROPBOX_OAUTH2_TOKEN = "sl.BPOO-_Dx61gMYy_iS3RVrlNI0TeJ5u5BDasn_Ejw1tEFRd9hfzUkb9u1tIlg544oxdTvj6lrfAei8HLLU6-AnstN8Ne_KVVu0ci2Ng2ZEtqKlPq5tVfCzcJAaXnoITFtCidtuns"
+DROPBOX_OAUTH2_TOKEN = "sl.BPmYsLXLwOL1sdknVWiABbR6Y2ErkQp-4mej8QN9Df4ocykpIbseImGwNpzkgq1328cb2KgAT4CTA4xmosr2LS6flXcxRVw-7vmQ4SUvo7ggCH4bRRae7FRACqyvFnu5swDAC54"
 DROPBOX_ROOT_PATH    = '/'
 DROPBOX_APP_KEY = 'h1gh1vqlt5v4deh'
 DROPBOX_APP_SECRET = '3u9vni1v0atajea'

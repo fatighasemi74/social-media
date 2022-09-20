@@ -5,7 +5,8 @@ from rest_framework import routers
 
 from .views import UserCreateAPIView, LogoutView, \
     LoginView, ProfileViewSet, RefreshTokenAPIView,\
-    FollowingPostsAPIView, ExploreAPIView, VerificationView, RelationViewSet
+    FollowingPostsAPIView, ExploreAPIView, VerificationView, RelationViewSet, \
+    FollowerAPIView, FollowingAPIView
 
 
 router = routers.SimpleRouter()
@@ -17,6 +18,8 @@ urlpatterns = [
 
     path('create/', UserCreateAPIView.as_view(), name='account-create'),
     path('login/', LoginView.as_view(), name='login'),
+    path('follower/<str:username>/', FollowerAPIView.as_view(), name='user-follower'),
+    path('following/<str:username>/', FollowingAPIView.as_view(), name='user-following'),
     path('refresh-token/', RefreshTokenAPIView.as_view(), name='token_refresh'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('home/', FollowingPostsAPIView.as_view(), name='home'),

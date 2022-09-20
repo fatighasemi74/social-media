@@ -35,7 +35,7 @@ class UserAccountCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserAccount
-        fields = ('name', 'password','password2',  'profile_picture', 'email', 'birth_date', 'bio')
+        fields = ('name', 'password','password2', 'email')
         extra_kwargs = {'password': {'write_only': True}, 'password2': {'write_only': True}}
 
 
@@ -67,10 +67,10 @@ class UserAccountCreateSerializer(serializers.ModelSerializer):
         user.save()
         useraccount = UserAccount.objects.create(
                                                  name=validated_data['name'],
-                                                 profile_picture=validated_data['profile_picture'],
-                                                 email=validated_data['email'],
-                                                 birth_date=validated_data['birth_date'],
-                                                 bio=validated_data['bio'])
+                                                 # profile_picture=validated_data['profile_picture'],
+                                                 email=validated_data['email'],)
+                                                 # birth_date=validated_data['birth_date'],
+                                                 # bio=validated_data['bio'])
         useraccount.username = user
         # print(useraccount.allowed)
         useraccount.save()
@@ -100,6 +100,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     def get_date_joined(self, obj):
         date_joined = obj.username.date_joined
         return date_joined.strftime('%Y-%m-%d')
+
 
 
 
@@ -136,10 +137,29 @@ class CreateOrDeleteRelationSerializer(serializers.ModelSerializer):
         fields = ("to_user", "from_user",)
 
     def create(self, validated_data):
+        log_in = UserAccount.objects.filter(name=self.context['request'].user).first()
         validatedata_to_user = validated_data['to_user']
         userto = validatedata_to_user['username']
         to_user = UserAccount.objects.filter(name=userto).first()
         validatedata_from_user = validated_data['from_user']
         userfrom = validatedata_from_user['username']
         from_user = UserAccount.objects.filter(name=userfrom).first()
-        return Relation.objects.create(from_user=from_user,to_user=to_user)
+        if not Relation.objects.filter(from_user=from_user,to_user=to_user) and from_user == log_in:
+            return Relation.objects.create(from_user=from_user,to_user=to_user)
+        raise ValidationError("you have followed before")
+
+class FollowingListSerializer(serializers.ModelSerializer):
+    to_user = serializers.CharField(source='to_user.username')
+    image = serializers.ImageField(source='to_user.profile_picture')
+
+    class Meta:
+        model = Relation
+        fields = ('to_user', 'image')
+
+class FollowerListSerializer(serializers.ModelSerializer):
+    from_user = serializers.CharField(source='from_user.username')
+    image = serializers.ImageField(source='from_user.profile_picture')
+
+    class Meta:
+        model = Relation
+        fields = ('from_user', 'image')

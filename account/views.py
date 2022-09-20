@@ -22,7 +22,7 @@ from django.contrib.auth.models import User
 from content.views import Pagination
 from .models import UserAccount, Relation
 from .serializers import UserAccountCreateSerializer, MyTokenObtainPairSerializer,\
-    ProfileSerializer, CreateOrDeleteRelationSerializer
+    ProfileSerializer, CreateOrDeleteRelationSerializer, FollowingListSerializer, FollowerListSerializer
 from content.models import Post
 # from relation.models import Relation
 from content.serializers import PostListSerializer
@@ -58,6 +58,9 @@ class RefreshTokenAPIView(APIView):
 
 
 class LoginView(APIView):
+    '''
+        log in
+    '''
 
     def post(self, request, format=None):
         data = request.data
@@ -100,6 +103,9 @@ class MyTokenObtainPairView(TokenObtainPairView):
 
 
 class UserCreateAPIView(CreateAPIView):
+    '''
+        register with name, email, passsword and password confirmation
+    '''
     serializer_class = UserAccountCreateSerializer
 
     def perform_create(self, serializer):
@@ -119,14 +125,20 @@ class UserCreateAPIView(CreateAPIView):
         email.send()
 
 class VerificationView(View):
-        def get(self, request, username):
-            user = UserAccount.objects.filter(name=username).first()
-            user.allowed = True
-            user.save()
-            return redirect('login')
+    '''
+        email link verification for log in
+    '''
+    def get(self, request, username):
+        user = UserAccount.objects.filter(name=username).first()
+        user.allowed = True
+        user.save()
+        return redirect('login')
 
 
 class LogoutView(APIView):
+    '''
+        log out
+    '''
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
@@ -138,8 +150,6 @@ class LogoutView(APIView):
             for cookie in request.COOKIES:
                 response.delete_cookie(cookie)
             return response
-
-            # return Response(status=status.HTTP_200_OK)
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -166,6 +176,22 @@ class ProfileViewSet(viewsets.ModelViewSet):
         if self.kwargs.get('name'):
             user = UserAccount.objects.get(name=self.kwargs.get('name'))
         return  users
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+        username = serializer.data['name']
+        domain = get_current_site(self.request).domain
+        link = reverse('activate', kwargs={'username': username})
+        activate_url = 'http://'+domain+link
+        email_body = 'hii '+username+' please this link:\n' + activate_url
+        email = EmailMessage(
+            'subject',
+            email_body,
+            settings.EMAIL_HOST_USER,
+            [serializer.data['email']],
+        )
+        email.fail_silently=False
+        email.send()
 
     def update(self, request, *args, **kwargs):
         '''
@@ -253,10 +279,13 @@ class ExploreAPIView(generics.ListAPIView):
 
 
 class RelationViewSet(viewsets.ModelViewSet):
+    '''
+        this viewset works for list of relations, create relation and delete it.
+    '''
     queryset = Relation.objects.all()
     serializer_class = CreateOrDeleteRelationSerializer
     permission_classes = [IsAuthenticated, ]
-    # lookup_field = 'to_user'
+    lookup_field = 'user'
 
 
     def get_queryset(self, *args, **kwargs):
@@ -267,22 +296,60 @@ class RelationViewSet(viewsets.ModelViewSet):
         return  relations
 
     def create(self, request, *args, **kwargs):
-        print("hiii")
+        '''
+            create relation(follow)
+        '''
         serializer = self.get_serializer(data=request.data)
-        print(serializer)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_create(self, serializer):
+        '''
+            create final def
+        '''
         serializer.save()
 
-    # def create(self, request, *args, **kwargs):
-    #     user = self.request.user
-    #     useraccount = UserAccount.objects.filter(name=user).first()
-    #     serializer = self.serializer_class
-    #     serializer(from_user=useraccount)
-    #     return Response(status=status.HTTP_200_OK)
+    def destroy(self, request, *args, **kwargs):
+        '''
+            delete relation(unfollow)
+        '''
+        to_user = UserAccount.objects.filter(name=kwargs['user']).first()
+        log_in = UserAccount.objects.filter(name=request.user).first()
+        relation = Relation.objects.filter(from_user=log_in,to_user=to_user).first()
+        if relation:
+            relation.delete()
+            content = {'message': 'deleted'}
+            return Response(content,status=status.HTTP_200_OK)
+        else:
+            content = {'message': 'you cant delete'}
+            return Response(content,status=status.HTTP_400_BAD_REQUEST)
 
+class FollowingAPIView(generics.ListAPIView):
+    serializer_class = FollowingListSerializer
+    permission_classes = (IsAuthenticated, )
+    queryset = Relation.objects.all()
+    pagination_class = Pagination
+    lookup_url_kwarg = 'username'
+
+
+    def get_queryset(self):
+        username = self.kwargs[self.lookup_url_kwarg]
+        user = UserAccount.objects.filter(name=username).first()
+        qs = Relation.objects.filter(from_user=user.id)
+        return qs.filter(from_user=user.id)
+
+class FollowerAPIView(generics.ListAPIView):
+    serializer_class = FollowerListSerializer
+    permission_classes = (IsAuthenticated, )
+    queryset = Relation.objects.all()
+    pagination_class = Pagination
+    lookup_url_kwarg = 'username'
+
+
+    def get_queryset(self):
+        username = self.kwargs[self.lookup_url_kwarg]
+        user = UserAccount.objects.filter(name=username).first()
+        qs = Relation.objects.filter(to_user=user.id)
+        return qs.filter(to_user=user.id)
