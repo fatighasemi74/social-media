@@ -178,21 +178,6 @@ class ProfileViewSet(viewsets.ModelViewSet):
             user = UserAccount.objects.get(name=self.kwargs.get('name'))
         return  users
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-        username = serializer.data['name']
-        domain = get_current_site(self.request).domain
-        link = reverse('activate', kwargs={'username': username})
-        activate_url = 'http://'+domain+link
-        email_body = 'hii '+username+' please this link:\n' + activate_url
-        email = EmailMessage(
-            'subject',
-            email_body,
-            settings.EMAIL_HOST_USER,
-            [serializer.data['email']],
-        )
-        email.fail_silently=False
-        email.send()
 
     def update(self, request, *args, **kwargs):
         '''
@@ -264,12 +249,10 @@ class ListPostViewSet(viewsets.ModelViewSet):
         relations = Relation.objects.filter(from_user=user.id).all()
         param = self.request.GET.get('route')
         if param == "home":
-            print("homeeee")
             for relation in relations:
                 post = Post.objects.filter(user=relation.to_user)
                 return post
         elif param == "explore":
-            print("explore")
             for relation in relations:
                 post = Post.objects.filter(user=relation.to_user)
                 return post
