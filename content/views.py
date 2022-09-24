@@ -24,6 +24,9 @@ class Pagination(pagination.PageNumberPagination):
     page_size = 2
 
 class PostCreateAPIView(generics.CreateAPIView):
+    '''
+        create new post
+    '''
 
     serializer_class = PostCreateSerializer
     permission_classes = (IsAuthenticated, )
@@ -42,10 +45,6 @@ class PostListAPIView(generics.ListAPIView):
     pagination_class = Pagination
     serializer_class = PostListSerializer
     permission_classes = (IsAuthenticated, )
-
-
-
-
 
 
 
@@ -84,51 +83,51 @@ class DeletePosAPIView(generics.DestroyAPIView):
             return Response(content,status=status.HTTP_400_BAD_REQUEST)
 
 
-#user post before using viewsets:
 
-# class PostDetailAPIView(generics.RetrieveAPIView):
-#     permission_classes = (IsAuthenticated,)  # HasPostPermission)
-#     serializer_class = PostDetailSerializer
-#     queryset = Post.objects.all()
-#
-
-# class UserPostListAPIView(generics.ListAPIView):
-#     serializer_class = PostDetailSerializer
-#     permission_classes = (IsAuthenticated, )#RelationExists )
-#     queryset = Post.objects.all()
-#     lookup_url_kwarg = 'username'
-#
-#     # pagination_class = PageNumberPagination
-#     # page_size = 10
-#     # pagination_class.page_size = page_size
-#
-#     def get_queryset(self):
-#         qs = super().get_queryset()
-#         username = self.kwargs[self.lookup_url_kwarg]
-#         user = UserAccount.objects.filter(name=username).first()
-#         return qs.filter(user=user.id)
-
-
-class UserPostReadOnlyViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = PostDetailSerializer
+class PostViewSet(viewsets.ModelViewSet):
+    serializer_class = PostListSerializer
     permission_classes = (IsAuthenticated, )
     queryset = Post.objects.all()
     pagination_class = Pagination
-    lookup_url_kwarg = 'username'
-    lookup_field = 'pk'
 
-    # pagination_class = PageNumberPagination
-    # page_size = 2
-    # pagination_class.page_size = page_size
 
-    def get_queryset(self):
+
+    def get_queryset(self, *args, **kwargs):
+        '''
+            list of user posts, post detail
+        '''
         qs = super().get_queryset()
-        username = self.kwargs[self.lookup_url_kwarg]
-        user = UserAccount.objects.filter(name=username).first()
-        return qs.filter(user=user.id)
+        param = self.request.GET.get('route')
+        if param:
+            user = UserAccount.objects.filter(name=param).first()
+            queryset = Post.objects.filter(user=user.id)
+            print(queryset)
+            return queryset
+        else:
+            return qs
 
-    def get_object(self):
-        qs = super().get_queryset()
-        # print(self.kwargs['pk'])
-        post = Post.objects.filter(id=self.kwargs['pk']).first()
-        return post
+    def update(self, request, *args, **kwargs):
+        '''
+            edit post
+        '''
+        log_in = UserAccount.objects.get(name=self.request.user)
+        post = Post.objects.filter(id=kwargs['pk']).first()
+        if post.user == log_in:
+            instance = self.get_object()
+            if request.data.get('caption'):
+                instance.caption = request.data.get('caption')
+                instance.save()
+            if request.data.get('title'):
+                instance.title = request.data.get('title')
+                instance.save()
+            if request.data.get('image'):
+                instance.image = request.data.get('image')
+                instance.save()
+            serializer = PostListSerializer(instance)
+            return Response(serializer.data)
+        else:
+            content = {'message': 'you cant edit this post.'}
+            return Response(content,status=status.HTTP_403_FORBIDDEN)
+
+
+

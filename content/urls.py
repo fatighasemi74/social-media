@@ -1,16 +1,19 @@
-from django.urls import URLPattern, path
+from django.urls import URLPattern, path, include
+from rest_framework import routers
+
 
 from content.views import PostCreateAPIView, PostListAPIView,\
-    PostEditAPIView, DeletePosAPIView, UserPostReadOnlyViewSet
+    PostEditAPIView, DeletePosAPIView, PostViewSet
 
-user_post_detail = UserPostReadOnlyViewSet.as_view({'get': 'retrieve'})
-user_post_list = UserPostReadOnlyViewSet.as_view({'get': 'list'})
+router = routers.SimpleRouter()
+router.register('post', PostViewSet, basename='post')
+
 
 urlpatterns = [
+    path('', include(router.urls)),
+
     path('posts/',PostListAPIView.as_view(), name='posts-list'),
     path('post/create/',PostCreateAPIView.as_view(), name='post-create'),
-    path('post/detail/<int:pk>/', user_post_detail, name='post-detail'),
     path('post/edit/<int:pk>/', PostEditAPIView.as_view(), name='post-edit'),
     path('post/delete/<int:pk>/', DeletePosAPIView.as_view(), name='post-edit'),
-    path('post/user/<str:username>/', user_post_list, name='user-post-list'),
 ]

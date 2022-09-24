@@ -4,6 +4,15 @@ from rest_framework import serializers
 from content.models import  Post
 from activity.serializers import CommentListSerializer, LikeListSerializer
 
+
+
+class PostCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Post
+        fields = ('id', 'title', 'caption', 'user', 'image', 'created_time')
+
+
 class PostListSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username')
     user_image = serializers.ImageField(source='user.profile_picture')
@@ -23,11 +32,6 @@ class PostListSerializer(serializers.ModelSerializer):
         serializer = LikeListSerializer(obj.likes.all(), many=True)
         return serializer.data
 
-class PostCreateSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Post
-        fields = ('id', 'title', 'caption', 'user', 'image', 'created_time')
 
 
 
