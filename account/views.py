@@ -254,7 +254,7 @@ class ListPostViewSet(viewsets.ModelViewSet):
                 return post
         elif param == "explore":
             for relation in relations:
-                post = Post.objects.filter(user=relation.to_user)
+                post = Post.objects.exclude(user=relation.to_user)
                 return post
 
 
