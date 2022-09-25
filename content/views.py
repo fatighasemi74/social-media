@@ -40,32 +40,6 @@ class PostCreateAPIView(generics.CreateAPIView):
         return super().post(request, *args, **kwargs)
 
 
-class PostListAPIView(generics.ListAPIView):
-    queryset = Post.objects.all()
-    pagination_class = Pagination
-    serializer_class = PostListSerializer
-    permission_classes = (IsAuthenticated, )
-
-
-
-class PostEditAPIView(generics.UpdateAPIView):
-    permission_classes = (IsAuthenticated, )
-    serializer_class = EditPostSerializer
-    queryset = Post.objects.all()
-
-
-    def put(self, request, pk, *args, **kwargs):
-        post = get_object_or_404(Post, **{'pk': pk})
-        log_in = UserAccount.objects.get(username=request.user)
-        if post.user == log_in:
-
-            serializer = EditPostSerializer(post)
-            # print(serializer.data)
-            return self.update(request, *args, **kwargs)
-        else:
-            content = {'message': 'you are not the owner'}
-            return Response(content,status=status.HTTP_400_BAD_REQUEST)
-
 class DeletePosAPIView(generics.DestroyAPIView):
     permission_classes = (IsAuthenticated, )
     serializer_class = DeletePostSerializer
@@ -128,6 +102,21 @@ class PostViewSet(viewsets.ModelViewSet):
         else:
             content = {'message': 'you cant edit this post.'}
             return Response(content,status=status.HTTP_403_FORBIDDEN)
+
+    def destroy(self, request, *args, **kwargs):
+        '''
+            delete post
+        '''
+        log_in = UserAccount.objects.get(name=self.request.user)
+        post = Post.objects.filter(id=kwargs['pk']).first()
+        print(post.user.id)
+        if post.user == log_in:
+            post.delete()
+            content = {"message": 'delete'}
+            return Response(content,status=status.HTTP_200_OK)
+        else:
+            content = {"message": "you cant delete"}
+            return Response(content, status=status.HTTP_403_FORBIDDEN)
 
 
 
