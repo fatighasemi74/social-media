@@ -17,7 +17,6 @@ class Post(BaseModel):
      user = models.ForeignKey(UserAccount, related_name='posts', on_delete=models.CASCADE)
      title = models.CharField(max_length=80, default='', blank=True, null=True)
      image = models.ImageField(upload_to='content/media', null=True, blank=True, validators=[FileExtensionValidator(allowed_extensions=['jpg', 'png', 'jpeg'])], default='data/account/media/defaultpost.jpeg')
-     # created_time = models.DateTimeField("created time", auto_now_add=True)
 
      class Meta:
          verbose_name = 'post'
@@ -45,3 +44,27 @@ class Post(BaseModel):
 #
 #     def __str__(self):
 #         return '{}'.format(str(self.post))
+
+class Comment(BaseModel):
+    caption = models.TextField()
+    user = models.ForeignKey(UserAccount, related_name='commentss', on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, related_name='commentss', on_delete=models.CASCADE)
+    reply_to = models.ForeignKey('self', related_name='repliess', on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        verbose_name = "comment"
+        verbose_name_plural = "comments"
+
+    def __str__(self):
+        return self.caption
+
+class Like(BaseModel):
+    user = models.ForeignKey(UserAccount, related_name='likess', on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, related_name='likess', on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = "like"
+        verbose_name_plural = "likes"
+
+    def __str__(self):
+        return "{} >> {}".format(self.user.username, self.post)

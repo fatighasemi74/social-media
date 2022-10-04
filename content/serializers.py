@@ -1,77 +1,97 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 
-from content.models import  Post
-from activity.serializers import CommentListSerializer, LikeListSerializer
+from content.models import  Post, Comment, Like
 
 
 
 class PostCreateSerializer(serializers.ModelSerializer):
+    '''
+        create post serializer
+    '''
 
     class Meta:
         model = Post
         fields = ('id', 'title', 'caption', 'user', 'image', 'created_time')
 
 
-class PostListSerializer(serializers.ModelSerializer):
+class PostSerializer(serializers.ModelSerializer):
+    '''
+        post serializer for user post, post detail, edit post, delete post
+    '''
     user = serializers.CharField(source='user.username')
     user_image = serializers.ImageField(source='user.profile_picture')
     comments_count = serializers.IntegerField(source='comments.count', read_only=True)
-    likes = serializers.SerializerMethodField()
+    # likes = serializers.SerializerMethodField()
+    # comments = serializers.SerializerMethodField()
     # likes_count = serializers.IntegerField(source='likes.count', read_only=True)
     # media = PostMediaSerializer(many=True)
     class Meta:
         model = Post
         # fields = '__all__'
-        fields = ('id','title',  'caption', 'user', 'image', 'user_image', 'comments_count', 'likes', 'created_time')
+        fields = ('id','title',  'caption', 'user', 'image', 'user_image', 'comments_count', 'created_time')
 
     # def get_comments(self, obj):
     #     serializer = CommentListSerializer(obj.comments.filter(reply_to__isnull=True), many=True)
     #     return serializer.count()
-    def get_likes(self, obj):
-        serializer = LikeListSerializer(obj.likes.all(), many=True)
-        return serializer.data
+    # def get_likes(self, obj):
+    #     serializer = LikeSerializer(obj.likes.all(), many=True)
+    #     return serializer.data
+
+class CommentCreateSerializer(serializers.ModelSerializer):
+    '''
+        create comment serializer
+    '''
+    class Meta:
+        model = Comment
+        fields = ('caption', 'post', 'reply_to')
+
+
+    def validate_caption(self, attr):
+        '''
+            validation method for caption length
+        '''
+        if len(attr) > 30:
+            raise ValidationError("Caption cannot be more than 30 characters!!")
+        return attr
+    def validators_reply_to(self, attr):
+        '''
+            validation method for reply
+        '''
+        if attr.reply_to is not None:
+            raise ValidationError("you can not reply to a reply recursively")
+        return attr
 
 
 
-
-class PostDetailSerializer(serializers.ModelSerializer):
+class CommentSerializer(serializers.ModelSerializer):
+    '''
+        comment serializer for list, comment detail, edit comment, delete comment
+    '''
     user = serializers.CharField(source='user.username')
     user_image = serializers.ImageField(source='user.profile_picture')
-    # media = PostMediaSerializer(many=True)
-    comments = serializers.SerializerMethodField()
-    likes = serializers.SerializerMethodField()
-
-
+    # replies = serializers.SerializerMethodField()
     class Meta:
-        model = Post
-        fields = ('id','title',  'caption', 'user', 'image', 'user_image', 'comments', 'likes', 'created_time')
+        model = Comment
+        fields = ('id', 'caption', 'user', 'created_time', 'user_image')
 
-    def get_comments(self, obj):
-        serializer = CommentListSerializer(obj.comments.filter(reply_to__isnull=True), many=True)
-        return serializer.data
+    # def get_replies(self, obj):
+    #     qs = obj.replies.all()
+    #
+    #     if qs.count() > 10:
+    #         qs = qs[:10]
+    #
+    #     serializer = CommentRepliesListSerializer(qs, many=True)
+    #     return serializer.data
 
-    def get_likes(self, obj):
-        serializer = LikeListSerializer(obj.likes.all(), many=True)
-        return serializer.data
-
-class EditPostSerializer(serializers.ModelSerializer):
+class LikeCreateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Post
-        fields = ('id','caption', 'title', 'image')
-    def update(self, instance, validated_data):
-        print(validated_data)
-        if validated_data['caption']:
-            instance.caption = validated_data['caption']
-        if validated_data['title']:
-            instance.title = validated_data['title']
-        if validated_data['image']:
-            instance.image = validated_data['image']
-        instance.save()
-        return instance
+        model = Like
+        fields = ['post']
 
-class DeletePostSerializer(serializers.ModelSerializer):
+class LikeSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source='user.username')
     class Meta:
-        model = Post
-        fields = "__all__"
-
+        model = Like
+        fields = ('id', 'user')

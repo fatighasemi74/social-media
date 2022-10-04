@@ -1,32 +1,31 @@
+import jwt
 from rest_framework.generics import  CreateAPIView
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken , AccessToken
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
-from rest_framework.decorators import action
+from rest_framework import viewsets
+from rest_framework import status, generics
 from django.middleware import csrf
 from django.contrib.auth import authenticate
 from django.conf import settings
-from rest_framework import viewsets
-from rest_framework import status, generics
-from django.shortcuts import get_object_or_404
 from django.views import View
 from django.shortcuts import redirect
 from django.core.mail import EmailMessage
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
-import jwt
 from django.contrib.auth.models import User
 
+from content.models import Post
+from content.serializers import PostSerializer
 from content.views import Pagination
+
 from .models import UserAccount, Relation
 from .serializers import UserAccountCreateSerializer, MyTokenObtainPairSerializer,\
     ProfileSerializer, CreateOrDeleteRelationSerializer, FollowingListSerializer, FollowerListSerializer
-from content.models import Post
-# from relation.models import Relation
-from content.serializers import PostListSerializer
+
 
 
 #new functions:
@@ -70,7 +69,6 @@ class LoginView(APIView):
         password = data.get('password', None)
         user = authenticate(username=username, password=password)
         useraccount = UserAccount.objects.filter(username=user).first()
-        # print(useraccount.allowed)
         if user is not None:
             if useraccount.allowed:
                 if user.is_active:
@@ -78,7 +76,6 @@ class LoginView(APIView):
                     username = data.get('username', None)
                     data = get_tokens_for_user(user)
                     data['username'] = username
-                    # print(data['refresh'])
                     response.set_cookie(
                         key = settings.SIMPLE_JWT['AUTH_COOKIE'],
                         value = data["refresh"],
@@ -88,7 +85,6 @@ class LoginView(APIView):
                         samesite = settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
                     )
                     csrf.get_token(request)
-                    # print(data['access'])
                     response.data = {"Success" : "Login successfully","data":data['access']}
                     return response
                 else:
@@ -172,10 +168,6 @@ class ProfileViewSet(viewsets.ModelViewSet):
             list of users, user profile
         '''
         users = UserAccount.objects.all()
-        log_in = User.objects.get(username=self.request.user)
-        log_in_user = UserAccount.objects.filter(username=log_in.id).first()
-        if self.kwargs.get('name'):
-            user = UserAccount.objects.get(name=self.kwargs.get('name'))
         return  users
 
 
@@ -208,12 +200,12 @@ class ProfileViewSet(viewsets.ModelViewSet):
                         user.set_password(password)
                         user.save()
                     else:
-                        raise ValidationError({"password": "password doesnt match"})
+                        raise ValidationError({"password": "پسوردها یکی نیستند."})
 
                 serializer = ProfileSerializer(instance)
                 return Response(serializer.data)
             else:
-                content = {'message': 'this is not your profile'}
+                content = {'message': 'پروفایل متعلق به شما نیست.'}
                 return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
@@ -226,10 +218,10 @@ class ProfileViewSet(viewsets.ModelViewSet):
             if log_in == user:
                 mainuser = User.objects.filter(username=user)
                 mainuser.delete()
-                content = {'message': 'delete'}
+                content = {'message': 'پاک شد.'}
                 return Response(content, status=status.HTTP_200_OK)
             else:
-                content = {'message': 'you cant delete'}
+                content = {'message': 'نمیتوانید پاک کنید.'}
                 return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -238,24 +230,31 @@ class ListPostViewSet(viewsets.ModelViewSet):
         home page and explore, based on following people
     '''
     permission_classes = (IsAuthenticated, )
-    serializer_class = PostListSerializer
+    serializer_class = PostSerializer
     pagination_class = Pagination
-    queryset = UserAccount.objects.all()
+    queryset = Post.objects.all()
 
     def get_queryset(self):
         qs = super().get_queryset()
         username = self.request.user
         user = UserAccount.objects.filter(name=username).first()
-        relations = Relation.objects.filter(from_user=user.id).all()
         param = self.request.GET.get('route')
         if param == "home":
-            for relation in relations:
-                post = Post.objects.filter(user=relation.to_user)
-                return post
+            relations = Relation.objects.filter(from_user=user.id).all()
+            if relations:
+                for relation in relations:
+                    post = Post.objects.filter(user=relation.to_user)
+                    return post
+            raise ValidationError({"message": "چیزی برای نمایش وجود ندارد."})
         elif param == "explore":
-            for relation in relations:
-                post = Post.objects.exclude(user=relation.to_user)
-                return post
+            relations = Relation.objects.filter(from_user=user.id).all()
+            if relations:
+                for relation in relations:
+                    post = Post.objects.exclude(user=relation.to_user)
+                    return post
+            return qs
+
+
 
 
 
@@ -302,11 +301,13 @@ class RelationViewSet(viewsets.ModelViewSet):
         relation = Relation.objects.filter(from_user=log_in,to_user=to_user).first()
         if relation:
             relation.delete()
-            content = {'message': 'deleted'}
+            content = {'message': 'پاک شد.'}
             return Response(content,status=status.HTTP_200_OK)
         else:
-            content = {'message': 'you cant delete'}
-            return Response(content,status=status.HTTP_400_BAD_REQUEST)
+            if to_user == log_in:
+                raise ValidationError({"message": "نمیتوانید خودتان را آنفالو کنید."})
+            raise ValidationError({'message': 'چیزی برای آنفالو کردن وجود ندارد.'})
+
 
 class FollowingAPIView(generics.ListAPIView):
     '''

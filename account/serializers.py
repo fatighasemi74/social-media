@@ -1,15 +1,11 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
-from rest_framework_simplejwt.exceptions import InvalidToken
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.auth.models import User
 
-from django.contrib.auth.hashers import make_password
 
 
 from .models import UserAccount, Relation
-from relation.serializers import RelationListSerializer
-from .functions import get_access_token
-from django.contrib.auth.models import User
 
 
 
@@ -44,18 +40,13 @@ class UserAccountCreateSerializer(serializers.ModelSerializer):
         if attr['password'] != attr['password2']:
             raise ValidationError("password must match.")
         if len(attr['password']) < 7:
-            raise ValidationError("This password must contain at least 7 characters.")
+            raise ValidationError("پسورد باید حداقل ۷ کاراکتر داشته باشد.")
         return attr
 
     def clean(self):
-        # cleaned_data = super().clean()
-        # email = cleaned_data.get('email')
         email = self.cleaned_data.get('email')
-
-        print(email)
         if User.objects.filter(email=email).exists():
-            print('errorrrrrr')
-            raise ValidationError("Email exists")
+            raise ValidationError("ایمیل وجود ندارد.")
         return self.cleaned_data
 
 
@@ -67,12 +58,8 @@ class UserAccountCreateSerializer(serializers.ModelSerializer):
         user.save()
         useraccount = UserAccount.objects.create(
                                                  name=validated_data['name'],
-                                                 # profile_picture=validated_data['profile_picture'],
                                                  email=validated_data['email'],)
-                                                 # birth_date=validated_data['birth_date'],
-                                                 # bio=validated_data['bio'])
         useraccount.username = user
-        # print(useraccount.allowed)
         useraccount.save()
         return  useraccount
 
@@ -144,9 +131,11 @@ class CreateOrDeleteRelationSerializer(serializers.ModelSerializer):
         validatedata_from_user = validated_data['from_user']
         userfrom = validatedata_from_user['username']
         from_user = UserAccount.objects.filter(name=userfrom).first()
-        if not Relation.objects.filter(from_user=from_user,to_user=to_user) and from_user == log_in:
-            return Relation.objects.create(from_user=from_user,to_user=to_user)
-        raise ValidationError("you have followed before")
+        if not Relation.objects.filter(from_user=from_user,to_user=to_user):
+            if from_user == log_in:
+                return Relation.objects.create(from_user=from_user,to_user=to_user)
+            raise ValidationError({"message":"نمیتوانید!"})
+        raise ValidationError({"message":"قبلا فالو کرده بودید."})
 
 class FollowingListSerializer(serializers.ModelSerializer):
     to_user = serializers.CharField(source='to_user.username')
