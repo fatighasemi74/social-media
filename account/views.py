@@ -342,3 +342,5 @@ class FollowerAPIView(generics.ListAPIView):
         user = UserAccount.objects.filter(name=username).first()
         qs = Relation.objects.filter(to_user=user.id)
         return qs.filter(to_user=user.id)
+
+

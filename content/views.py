@@ -25,18 +25,12 @@ class PostCreateAPIView(generics.CreateAPIView):
     permission_classes = (IsAuthenticated, )
 
     def post(self, request, *args, **kwargs):
-        print('jjjjj')
         if isinstance(request.data, QueryDict):
             request.data._mutable = True
         user = self.request.user.id
         useraccount = UserAccount.objects.filter(username_id=user).first()
         request.data['user'] = useraccount.id
         return super().post(request, *args, **kwargs)
-
-
-
-
-
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -59,7 +53,6 @@ class PostViewSet(viewsets.ModelViewSet):
         if param:
             user = UserAccount.objects.filter(name=param).first()
             queryset = Post.objects.filter(user=user.id)
-            print(queryset)
             return queryset
         else:
             return qs

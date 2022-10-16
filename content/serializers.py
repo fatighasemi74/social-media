@@ -3,6 +3,7 @@ from rest_framework.exceptions import ValidationError
 
 
 from content.models import  Post, Comment, Like
+from account.serializers import  ProfileSerializer
 
 
 
@@ -10,10 +11,21 @@ class PostCreateSerializer(serializers.ModelSerializer):
     '''
         create post serializer
     '''
+    # user = serializers.PrimaryKeyRelatedField(queryset=Post.objects.all(), source='user.user')
+    # user = ProfileSerializer(many=True, read_only=True)
 
     class Meta:
         model = Post
         fields = ('id', 'title', 'caption', 'user', 'image', 'created_time')
+
+    # def create(self, validated_data):
+    #     # user = validated_data['user']
+    #     print(validated_data, 'rrrrrr')
+    #     # print(instance, 'inssss')
+    #     # self.instance.user = validated_data['user']
+    #     # instance.save()
+    #
+    #     return Post.objects.create(**validated_data)
 
 
 class PostSerializer(serializers.ModelSerializer):
