@@ -1,8 +1,9 @@
-from rest_framework import serializers
+from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
-
+from rest_framework.response import Response
 
 from content.models import  Post, Comment, Like
+from account.models import UserAccount
 from account.serializers import  ProfileSerializer
 
 
@@ -35,21 +36,30 @@ class PostSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username')
     user_image = serializers.ImageField(source='user.profile_picture')
     comments_count = serializers.IntegerField(source='comments.count', read_only=True)
-    # likes = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
     # comments = serializers.SerializerMethodField()
-    # likes_count = serializers.IntegerField(source='likes.count', read_only=True)
+    likes_count = serializers.IntegerField(source='likes.count', read_only=True)
     # media = PostMediaSerializer(many=True)
     class Meta:
         model = Post
         # fields = '__all__'
-        fields = ('id','title',  'caption', 'user', 'image', 'user_image', 'comments_count', 'created_time')
+        fields = ('id','title',  'caption', 'user', 'image', 'user_image', 'comments_count', 'likes_count', 'created_time', 'is_liked')
 
     # def get_comments(self, obj):
     #     serializer = CommentListSerializer(obj.comments.filter(reply_to__isnull=True), many=True)
     #     return serializer.count()
-    # def get_likes(self, obj):
-    #     serializer = LikeSerializer(obj.likes.all(), many=True)
-    #     return serializer.data
+
+    def get_is_liked(self, obj):
+        request = self.context['request'].user
+        log_in = UserAccount.objects.filter(name=request).first()
+        # serializer = LikeSerializer(obj.likes.all(), many=True)
+        likes = obj.likes.first()
+        if obj.likes.first():
+            if log_in == likes.user:
+                return True
+        return False
+        # return serializer.data
+
 
 class CommentCreateSerializer(serializers.ModelSerializer):
     '''

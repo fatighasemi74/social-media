@@ -68,7 +68,7 @@ INSTALLED_APPS = [
 
 ]
 DEFAULT_FILE_STORAGE = 'storages.backends.dropbox.DropBoxStorage'
-DROPBOX_OAUTH2_TOKEN = "sl.BRMiz0AG5k1W2X8d4WN6RHHHZWczssty9QvhvkO1orMD3Xfz4xAzACd57h8wIXo71uvWQQx-Y4NKsNKuS2dgp-sFeDxcsy8ocVKGSw17dejraCIcBT4_UPva90Q4P6i0fEFYJiA"
+DROPBOX_OAUTH2_TOKEN = "sl.BRogkZSwA8_ktJghy53HP274ZLeF6WmFsBmr6g-OeelR-IF37vo_WKC8KnlluZJeTEI6-NcUsiWunSR9joB6tcBXjqYMTS-pSzslIC2lckxAuv8r-FxSI0TtYqtjGnk5Nf9nPQ4"
 DROPBOX_ROOT_PATH    = '/'
 DROPBOX_APP_KEY = 'h1gh1vqlt5v4deh'
 DROPBOX_APP_SECRET = '3u9vni1v0atajea'
@@ -198,8 +198,8 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 # EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-EMAIL_HOST_USER = 'f.ghasembang@gmail.com'
-EMAIL_HOST_PASSWORD = 'cxjnwxaevaftjsoq'
+# EMAIL_HOST_USER = 'f.ghasembang@gmail.com'
+# EMAIL_HOST_PASSWORD = 'cbrhyvphyjbbmhec'
 
 
 # Default primary key field type

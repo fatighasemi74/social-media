@@ -47,9 +47,9 @@ class Post(BaseModel):
 
 class Comment(BaseModel):
     caption = models.TextField()
-    user = models.ForeignKey(UserAccount, related_name='commentss', on_delete=models.CASCADE)
-    post = models.ForeignKey(Post, related_name='commentss', on_delete=models.CASCADE)
-    reply_to = models.ForeignKey('self', related_name='repliess', on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(UserAccount, related_name='comments', on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, related_name='comments', on_delete=models.CASCADE)
+    reply_to = models.ForeignKey('self', related_name='replies', on_delete=models.CASCADE, null=True)
 
     class Meta:
         verbose_name = "comment"
@@ -59,8 +59,8 @@ class Comment(BaseModel):
         return self.caption
 
 class Like(BaseModel):
-    user = models.ForeignKey(UserAccount, related_name='likess', on_delete=models.CASCADE)
-    post = models.ForeignKey(Post, related_name='likess', on_delete=models.CASCADE)
+    user = models.ForeignKey(UserAccount, related_name='likes', on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, related_name='likes', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = "like"

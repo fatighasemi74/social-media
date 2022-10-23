@@ -74,7 +74,7 @@ class PostViewSet(viewsets.ModelViewSet):
             if request.data.get('image'):
                 instance.image = request.data.get('image')
                 instance.save()
-            serializer = PostSerializer(instance)
+            serializer = PostSerializer(instance, context={'request': request})
             return Response(serializer.data)
         else:
             content = {'message': 'اجازه ی ادیت کردن ندارید.'}

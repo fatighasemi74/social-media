@@ -30,8 +30,8 @@ class UserAccount(models.Model):
 
 
 class Relation(BaseModel):
-    from_user = models.ForeignKey(UserAccount, related_name='followingss', on_delete=models.CASCADE)
-    to_user = models.ForeignKey(UserAccount, related_name='follewrss', on_delete=models.CASCADE)
+    from_user = models.ForeignKey(UserAccount, related_name='followings', on_delete=models.CASCADE)
+    to_user = models.ForeignKey(UserAccount, related_name='follewrs', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Relation'
