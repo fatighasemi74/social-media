@@ -55,7 +55,8 @@ class PostViewSet(viewsets.ModelViewSet):
             queryset = Post.objects.filter(user=user.id)
             return queryset
         else:
-            return qs
+            return Post.objects.order_by('-created_time')
+            # return qs
 
     def update(self, request, *args, **kwargs):
         '''
@@ -156,6 +157,23 @@ class CommentViewSet(viewsets.ModelViewSet):
         '''
             delete comment
         '''
+        post = Post.objects.filter(id=self.kwargs['pk']).first()
+        log_in = UserAccount.objects.get(username=request.user)
+
+        comment = Comment.objects.filter(user=log_in, post=post).first()
+
+        if comment:
+            comment.delete()
+            content = {'message': 'پاک شد.', 'status': 200}
+            return Response(content,status=status.HTTP_200_OK)
+        else:
+            content = {'message': 'همچین کامنتی وجود ندارد.', 'status': 400}
+            return Response(content, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
         comment = Comment.objects.filter(id=self.kwargs['pk']).first()
         if comment:
             log_in = UserAccount.objects.get(username=request.user)
@@ -213,7 +231,6 @@ class LikeViewSet(viewsets.ModelViewSet):
             delete like
         '''
         post = Post.objects.filter(id=self.kwargs['pk']).first()
-        print(post.id, "jhhhhh")
         log_in = UserAccount.objects.get(username=request.user)
 
         like = Like.objects.filter(user=log_in, post=post).first()

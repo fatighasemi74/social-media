@@ -87,7 +87,7 @@ class CommentCreateSerializer(serializers.ModelSerializer):
     user_image = serializers.ImageField(source='user.profile_picture', read_only=True)
     class Meta:
         model = Comment
-        fields = ('caption', 'post', 'reply_to', 'username', 'user_image')
+        fields = ('id' ,'caption', 'post', 'reply_to', 'username', 'user_image')
 
 
     def validate_caption(self, attr):
