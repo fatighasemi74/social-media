@@ -19,16 +19,6 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 # BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-dx = {
-    "access_token": "sl.BPHvgDVIMTOBPJRbKX0CvdCOyTcx_Vk7AqwwYXqYmbZrdfh1aH7LCG8peLEebVvOEgM_7yK_xx6xbk8XiqEh7UNnBDT0s9SV2hUOgmBvkZFikk89xS1e_8nNosMQkLcftjCQWas",
-    "token_type": "bearer",
-    "expires_in": 14400,
-    "refresh_token": "I0uK5UQExmkAAAAAAAAAASM_e3i7YhOs-fusmUpJlNr5bECPKikND_GWA8nWjNka",
-    "scope": "account_info.read files.content.read files.content.write files.metadata.read files.metadata.write",
-    "uid": "1387129185",
-    "account_id": "dbid:AAAlCjPw1qz_ZGqhpTh23nxeGpfAA5--YFA"
-}
-dbx = dropbox.Dropbox(app_key = "h1gh1vqlt5v4deh", app_secret = "3u9vni1v0atajea", oauth2_refresh_token = dx)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -67,11 +57,7 @@ INSTALLED_APPS = [
     'content',
 
 ]
-DEFAULT_FILE_STORAGE = 'storages.backends.dropbox.DropBoxStorage'
-DROPBOX_OAUTH2_TOKEN = "sl.BRogkZSwA8_ktJghy53HP274ZLeF6WmFsBmr6g-OeelR-IF37vo_WKC8KnlluZJeTEI6-NcUsiWunSR9joB6tcBXjqYMTS-pSzslIC2lckxAuv8r-FxSI0TtYqtjGnk5Nf9nPQ4"
-DROPBOX_ROOT_PATH    = '/'
-DROPBOX_APP_KEY = 'h1gh1vqlt5v4deh'
-DROPBOX_APP_SECRET = '3u9vni1v0atajea'
+
 
 
 MIDDLEWARE = [
@@ -193,13 +179,16 @@ STATIC_URL = '/static/'
 STATIC_ROOT= BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_USE_TLS = True
-EMAIL_PORT = 587
 # EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 # EMAIL_HOST_USER = 'f.ghasembang@gmail.com'
 # EMAIL_HOST_PASSWORD = 'cbrhyvphyjbbmhec'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'mail.binjhom.ir'
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'marzyra@binjhom.ir'
+EMAIL_HOST_PASSWORD = 'zwz+49hICi$F'
 
 
 # Default primary key field type
@@ -261,5 +250,5 @@ SIMPLE_JWT = {
     'AUTH_COOKIE_SECURE': False,
     'AUTH_COOKIE_HTTP_ONLY': True,
     'AUTH_COOKIE_PATH': '/',
-    'AUTH_COOKIE_SAMESITE': 'None',
+    'AUTH_COOKIE_SAMESITE': 'lax',
 }

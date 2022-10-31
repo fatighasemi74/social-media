@@ -12,13 +12,31 @@ class PostCreateSerializer(serializers.ModelSerializer):
     '''
         create post serializer
     '''
+    username = serializers.CharField(source='user.username', read_only=True)
+    user_image = serializers.ImageField(source='user.profile_picture', read_only=True)
+    comments_count = serializers.IntegerField(source='comments.count', read_only=True)
+    likes_count = serializers.IntegerField(source='likes.count', read_only=True)
+
     # user = serializers.PrimaryKeyRelatedField(queryset=Post.objects.all(), source='user.user')
     # user = ProfileSerializer(many=True, read_only=True)
 
     class Meta:
         model = Post
-        fields = ('id', 'title', 'caption', 'user', 'image', 'created_time')
+        fields = ('id', 'title', 'caption', 'user','username', 'user_image', 'image', 'created_time', 'comments_count', 'likes_count')
+        extra_kwargs = {
+        "caption": {
+            "validators": [],
+        },
+    }
 
+    def validate_caption(self, attr):
+        '''
+            validation method for caption length
+        '''
+        if attr == "":
+            content = {'message': 'کپشن خالی ست.', 'status': 400}
+            raise ValidationError({'message': 'کپشن خالی ست.', 'status': 400})
+        return attr
     # def create(self, validated_data):
     #     # user = validated_data['user']
     #     print(validated_data, 'rrrrrr')
@@ -33,7 +51,7 @@ class PostSerializer(serializers.ModelSerializer):
     '''
         post serializer for user post, post detail, edit post, delete post
     '''
-    user = serializers.CharField(source='user.username')
+    username = serializers.CharField(source='user.username')
     user_image = serializers.ImageField(source='user.profile_picture')
     comments_count = serializers.IntegerField(source='comments.count', read_only=True)
     is_liked = serializers.SerializerMethodField()
@@ -43,7 +61,7 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         # fields = '__all__'
-        fields = ('id','title',  'caption', 'user', 'image', 'user_image', 'comments_count', 'likes_count', 'created_time', 'is_liked')
+        fields = ('id','title',  'caption', 'username', 'image', 'user_image', 'comments_count', 'likes_count', 'created_time', 'is_liked')
 
     # def get_comments(self, obj):
     #     serializer = CommentListSerializer(obj.comments.filter(reply_to__isnull=True), many=True)
@@ -65,9 +83,11 @@ class CommentCreateSerializer(serializers.ModelSerializer):
     '''
         create comment serializer
     '''
+    username = serializers.CharField(source='user.username', read_only=True)
+    user_image = serializers.ImageField(source='user.profile_picture', read_only=True)
     class Meta:
         model = Comment
-        fields = ('caption', 'post', 'reply_to')
+        fields = ('caption', 'post', 'reply_to', 'username', 'user_image')
 
 
     def validate_caption(self, attr):
@@ -91,12 +111,12 @@ class CommentSerializer(serializers.ModelSerializer):
     '''
         comment serializer for list, comment detail, edit comment, delete comment
     '''
-    user = serializers.CharField(source='user.username')
+    username = serializers.CharField(source='user.username')
     user_image = serializers.ImageField(source='user.profile_picture')
     # replies = serializers.SerializerMethodField()
     class Meta:
         model = Comment
-        fields = ('id', 'caption', 'user', 'created_time', 'user_image')
+        fields = ('id', 'caption', 'username', 'created_time', 'user_image')
 
     # def get_replies(self, obj):
     #     qs = obj.replies.all()
@@ -113,7 +133,7 @@ class LikeCreateSerializer(serializers.ModelSerializer):
         fields = ['post']
 
 class LikeSerializer(serializers.ModelSerializer):
-    user = serializers.CharField(source='user.username')
+    username = serializers.CharField(source='user.username')
     class Meta:
         model = Like
-        fields = ('id', 'user')
+        fields = ('id', 'username')

@@ -34,20 +34,30 @@ class UserAccountCreateSerializer(serializers.ModelSerializer):
         fields = ('name', 'password','password2', 'email')
         extra_kwargs = {'password': {'write_only': True}, 'password2': {'write_only': True}}
 
-
-
-    def validate(self, attr):
-        if attr['password'] != attr['password2']:
-            raise ValidationError("password must match.")
-        if len(attr['password']) < 7:
-            raise ValidationError("پسورد باید حداقل ۷ کاراکتر داشته باشد.")
+    def validate_name(self, attr):
+        '''
+            validation method for username
+        '''
+        if attr == "":
+            raise ValidationError({'message': 'نام کاربری خالی ست.', 'status': 400})
         return attr
+
 
     def clean(self):
         email = self.cleaned_data.get('email')
         if User.objects.filter(email=email).exists():
-            raise ValidationError("ایمیل وجود ندارد.")
+            raise ValidationError({'message': 'ایمیل وجود ندارد.', 'status': 400})
         return self.cleaned_data
+
+    def validate(self, attr):
+        if attr['password'] != attr['password2']:
+            raise ValidationError({'message': "پسورد مطابقت ندارد.", 'status': 400})
+        if len(attr['password']) < 7:
+            raise ValidationError({'message' : "پسورد باید حداقل ۷ کاراکتر داشته باشد.", 'status': 400})
+        return attr
+
+
+
 
 
 
@@ -70,6 +80,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     # user_image = serializers.ImageField(source='follower.profile_picture')
     followers_count = serializers.IntegerField(source='follewrs.count', read_only=True)
     followings_count = serializers.IntegerField(source='followings.count', read_only=True)
+    posts_count = serializers.IntegerField(source='posts.count', read_only=True)
     is_followed = serializers.SerializerMethodField()
     password = serializers.CharField(write_only=True, required=True,
         style={'input_type': 'password'})
@@ -82,7 +93,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = UserAccount
         fields = ('id', 'name','email', 'date_joined',
                   'profile_picture', 'bio', 'followers_count', 'followings_count', 'birth_date',
-                  'old_password', 'password', 'password2', 'is_followed')
+                  'old_password', 'password', 'password2', 'is_followed', 'posts_count')
 
     def get_date_joined(self, obj):
         date_joined = obj.username.date_joined

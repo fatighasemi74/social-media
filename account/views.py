@@ -17,6 +17,7 @@ from django.core.mail import EmailMessage
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
 from django.contrib.auth.models import User
+import datetime
 
 from content.models import Post
 from content.serializers import PostSerializer
@@ -27,8 +28,7 @@ from .serializers import UserAccountCreateSerializer, MyTokenObtainPairSerialize
     ProfileSerializer, CreateOrDeleteRelationSerializer, FollowingListSerializer, FollowerListSerializer
 
 
-
-#new functions:
+# new functions:
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
     refresh['username'] = str(user)
@@ -37,23 +37,38 @@ def get_tokens_for_user(user):
         'access': str(refresh.access_token),
     }
 
+
 def refresh_token_for_user(user):
     refresh = RefreshToken.for_user(user)
     return {
         'access': str(refresh.access_token),
     }
 
+
 class RefreshTokenAPIView(APIView):
 
     def post(self, request):
+        print('hereeeeeeeeeeeeeee')
         refresh = self.request.COOKIES.get('refresh_token')
-        response = Response()
-        decode = jwt.decode(refresh,settings.SECRET_KEY, algorithms=['HS256'])
+        print('refresh', refresh)
+        decode = jwt.decode(refresh, settings.SECRET_KEY, algorithms='HS256')
         user_id = decode['user_id']
+        username = decode['username']
         user = User.objects.filter(id=user_id).first()
-        data = refresh_token_for_user(user)
+        print('userrrrrrr', user)
 
-        print(data['access'])
+        access = jwt.encode({
+            'user_id': user_id,
+            'username': username,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1),
+        }, 'SECRET_KEY', algorithm='HS256')
+
+        data = {
+            "access_token": access,
+            "message": "ok",
+            "status": status.HTTP_200_OK
+        }
+
         return Response(data, status=status.HTTP_200_OK)
 
 
@@ -67,33 +82,42 @@ class LoginView(APIView):
         response = Response()
         username = data.get('username', None)
         password = data.get('password', None)
-        user = authenticate(username=username, password=password)
-        useraccount = UserAccount.objects.filter(username=user).first()
-        if user is not None:
-            if useraccount.allowed:
-                if user.is_active:
+        if username and password != "":
+            user = authenticate(username=username, password=password)
+            useraccount = UserAccount.objects.filter(username=user).first()
+            if user is not None:
+                if useraccount.allowed:
+                    if user.is_active:
 
-                    username = data.get('username', None)
-                    data = get_tokens_for_user(user)
-                    data['username'] = username
-                    response.set_cookie(
-                        key = settings.SIMPLE_JWT['AUTH_COOKIE'],
-                        value = data["refresh"],
-                        expires = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
-                        secure = settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
-                        httponly = settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
-                        samesite = settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
-                    )
-                    csrf.get_token(request)
-                    response.data = {"Success" : "Login successfully","data":data['access']}
-                    return response
+                        username = data.get('username', None)
+                        data = get_tokens_for_user(user)
+                        data['username'] = username
+                        response.set_cookie(
+                            key = settings.SIMPLE_JWT['AUTH_COOKIE'],
+                            value = data["refresh"],
+                            expires = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
+                            secure = settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+                            httponly = settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+                            samesite = settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
+                        )
+                        csrf.get_token(request)
+                        # response.data = {"Success" : "Login successfully","data":data['access']}
+                        content = {"message" : "با موفقیت وارد شدید.", "data": data['access'], 'status': 200}
+                        # return response
+                        return Response(content, status=status.HTTP_200_OK)
+                    else:
+                        content = {'message': 'کاربری هنوز فعال نشده است.', 'status': 404}
+                        return Response(content, status=status.HTTP_404_NOT_FOUND)
                 else:
-                    return Response({"No active" : "This account is not active!!"}, status=status.HTTP_404_NOT_FOUND)
-            else:
-                return Response({"No active": "This account is not allowed!!"}, status=status.HTTP_404_NOT_FOUND)
+                    content = {'message': 'کاربری هنوز تایید نشده است.', 'status': 404}
+                    return Response(content, status=status.HTTP_404_NOT_FOUND)
 
+            else:
+                content = {'message': 'نام کاربری یا رمز عبور اشتباه ست.', 'status': 404}
+                return Response(content, status=status.HTTP_404_NOT_FOUND)
         else:
-            return Response({"Invalid" : "Invalid username or password!!"}, status=status.HTTP_404_NOT_FOUND)
+            content = {'message': 'نام کاربری یا رمز عبور خالی ست.', 'status': 404}
+            return Response(content, status=status.HTTP_404_NOT_FOUND)
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
@@ -111,7 +135,7 @@ class UserCreateAPIView(CreateAPIView):
         domain = get_current_site(self.request).domain
         link = reverse('activate', kwargs={'username': username})
         activate_url = 'http://'+domain+link
-        email_body = 'hii '+username+' please this link:\n' + activate_url
+        email_body = 'hii '+username+' please click the link bellow:\n' + activate_url
         email = EmailMessage(
             'subject',
             email_body,
@@ -189,23 +213,28 @@ class ProfileViewSet(viewsets.ModelViewSet):
                 if request.data.get('birth_date'):
                     instance.birth_date = request.data.get('birth_date')
                     instance.save()
-                if request.data.get('old_password'):
+                if request.data.get('password') or request.data.get('password2'):
                     old_password = request.data.get('old_password')
-                    user = self.request.user
-                    if not user.check_password(old_password):
-                        raise ValidationError({"old_password": "Old password is not correct"})
-                    password = request.data.get('password')
-                    password2 = request.data.get('password2')
-                    if password == password2:
-                        user.set_password(password)
-                        user.save()
+                    if old_password:
+                        user = self.request.user
+                        if not user.check_password(old_password):
+                            raise ValidationError({'message': 'پسورد قدیمی درست نیست.', 'status': 400})
+                        password = request.data.get('password')
+                        password2 = request.data.get('password2')
+                        if password == password2 == old_password:
+                            raise ValidationError({"message": "پسورد مشابه قبلی است.", 'status': 400})
+                        elif password == password2:
+                            user.set_password(password)
+                            user.save()
+                        else:
+                            raise ValidationError({"message": "پسوردها یکی نیستند.", 'status': 400})
                     else:
-                        raise ValidationError({"password": "پسوردها یکی نیستند."})
+                        raise ValidationError({"message": "پسورد قدیمی را وارد کنید.", 'status': 400})
 
-                serializer = ProfileSerializer(instance)
+                serializer = ProfileSerializer(instance, context={'request': request})
                 return Response(serializer.data)
             else:
-                content = {'message': 'پروفایل متعلق به شما نیست.'}
+                content = {'message': 'پروفایل متعلق به شما نیست.', 'status': 400}
                 return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):

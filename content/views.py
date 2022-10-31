@@ -77,7 +77,7 @@ class PostViewSet(viewsets.ModelViewSet):
             serializer = PostSerializer(instance, context={'request': request})
             return Response(serializer.data)
         else:
-            content = {'message': 'اجازه ی ادیت کردن ندارید.'}
+            content = {'message': 'اجازه ی ادیت کردن ندارید.', 'status': 403}
             return Response(content,status=status.HTTP_403_FORBIDDEN)
 
     def destroy(self, request, *args, **kwargs):
@@ -89,10 +89,10 @@ class PostViewSet(viewsets.ModelViewSet):
         print(post.user.id)
         if post.user == log_in:
             post.delete()
-            content = {"message": 'پاک شد.'}
+            content = {"message": 'پاک شد.', 'status': 200}
             return Response(content,status=status.HTTP_200_OK)
         else:
-            content = {"message": "اجازه ی پاک کردن ندارید."}
+            content = {"message": "اجازه ی پاک کردن ندارید.", 'status': 403}
             return Response(content, status=status.HTTP_403_FORBIDDEN)
 
 class CommentCreateAPIView(generics.CreateAPIView):
@@ -149,7 +149,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             serializer = CommentSerializer(instance)
             return Response(serializer.data)
         else:
-            content = {'message': 'اجازه ی ادیت کردن ندارید.'}
+            content = {'message': 'اجازه ی ادیت کردن ندارید.', 'status': 403}
             return Response(content,status=status.HTTP_403_FORBIDDEN)
 
     def destroy(self, request, pk, *args, **kwargs):
@@ -212,16 +212,32 @@ class LikeViewSet(viewsets.ModelViewSet):
         '''
             delete like
         '''
-        like = Like.objects.filter(id=self.kwargs['pk']).first()
+        post = Post.objects.filter(id=self.kwargs['pk']).first()
+        print(post.id, "jhhhhh")
+        log_in = UserAccount.objects.get(username=request.user)
+
+        like = Like.objects.filter(user=log_in, post=post).first()
+
         if like:
-            log_in = UserAccount.objects.get(username=request.user)
-            if like.user == log_in:
-                like.delete()
-                content = {'message': 'آنلایک شد.'}
-                return Response(content,status=status.HTTP_200_OK)
-            else:
-                content = {'message': 'اجازه ی آنلایک کردن ندارید.'}
-                return Response(content,status=status.HTTP_400_BAD_REQUEST)
+            like.delete()
+            content = {'message': 'آنلایک شد.', 'status': 200}
+            return Response(content,status=status.HTTP_200_OK)
         else:
-            content = {'message': 'همچین لایکی وجود ندارد.'}
+            content = {'message': 'همچین لایکی وجود ندارد.', 'status': 400}
             return Response(content, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+        # like = Like.objects.filter(id=self.kwargs['pk']).first()
+        # if like:
+        #     log_in = UserAccount.objects.get(username=request.user)
+        #     if like.user == log_in:
+        #         like.delete()
+        #         content = {'message': 'آنلایک شد.'}
+        #         return Response(content,status=status.HTTP_200_OK)
+        #     else:
+        #         content = {'message': 'اجازه ی آنلایک کردن ندارید.'}
+        #         return Response(content,status=status.HTTP_400_BAD_REQUEST)
+        # else:
+        #     content = {'message': 'همچین لایکی وجود ندارد.'}
+        #     return Response(content, status=status.HTTP_400_BAD_REQUEST)
