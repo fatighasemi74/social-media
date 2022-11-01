@@ -119,6 +119,20 @@ class ProfileSerializer(serializers.ModelSerializer):
     #     # print(serializer.data[0]['to_user'])
     #     return serializer.data[0]['to_user']
 
+class ChangePasswordSerializer(serializers.ModelSerializer):
+    """
+    Serializer for password change endpoint.
+    """
+    password = serializers.CharField(write_only=True, required=True,
+        style={'input_type': 'password'})
+    password2 = serializers.CharField(write_only=True, required=True,
+                                      style={'input_type': 'password'})
+    old_password = serializers.CharField(write_only=True, required=True,
+                                         style={'input_type': 'password'})
+
+    class Meta:
+        model = UserAccount
+        fields = ('old_password', 'password', 'password2')
 
 
 

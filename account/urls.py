@@ -6,7 +6,7 @@ from rest_framework import routers
 from .views import UserCreateAPIView, LogoutView, \
     LoginView, ProfileViewSet, RefreshTokenAPIView,\
      VerificationView, RelationViewSet, \
-    FollowerAPIView, FollowingAPIView, ListPostViewSet
+    FollowerAPIView, FollowingAPIView, ListPostViewSet, ChangePasswordView
 
 
 router = routers.SimpleRouter()
@@ -24,5 +24,6 @@ urlpatterns = [
     path('refresh-token/', RefreshTokenAPIView.as_view(), name='token_refresh'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('activate/<str:username>/', VerificationView.as_view(), name='activate'),
+    path('change-password/', ChangePasswordView.as_view(), name='change-password'),
 
 ]

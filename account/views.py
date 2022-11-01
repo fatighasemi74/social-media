@@ -25,7 +25,8 @@ from content.views import Pagination
 
 from .models import UserAccount, Relation
 from .serializers import UserAccountCreateSerializer, MyTokenObtainPairSerializer,\
-    ProfileSerializer, CreateOrDeleteRelationSerializer, FollowingListSerializer, FollowerListSerializer
+    ProfileSerializer, CreateOrDeleteRelationSerializer, FollowingListSerializer, \
+    FollowerListSerializer, ChangePasswordSerializer
 
 
 # new functions:
@@ -213,23 +214,6 @@ class ProfileViewSet(viewsets.ModelViewSet):
                 if request.data.get('birth_date'):
                     instance.birth_date = request.data.get('birth_date')
                     instance.save()
-                if request.data.get('password') or request.data.get('password2'):
-                    old_password = request.data.get('old_password')
-                    if old_password:
-                        user = self.request.user
-                        if not user.check_password(old_password):
-                            raise ValidationError({'message': 'پسورد قدیمی درست نیست.', 'status': 400})
-                        password = request.data.get('password')
-                        password2 = request.data.get('password2')
-                        if password == password2 == old_password:
-                            raise ValidationError({"message": "پسورد مشابه قبلی است.", 'status': 400})
-                        elif password == password2:
-                            user.set_password(password)
-                            user.save()
-                        else:
-                            raise ValidationError({"message": "پسوردها یکی نیستند.", 'status': 400})
-                    else:
-                        raise ValidationError({"message": "پسورد قدیمی را وارد کنید.", 'status': 400})
 
                 serializer = ProfileSerializer(instance, context={'request': request})
                 return Response(serializer.data)
@@ -253,6 +237,39 @@ class ProfileViewSet(viewsets.ModelViewSet):
                 content = {'message': 'نمیتوانید پاک کنید.'}
                 return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
+class ChangePasswordView(generics.UpdateAPIView):
+    """
+        An endpoint for changing password.
+    """
+    serializer_class = ChangePasswordSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_object(self, queryset=None):
+        obj = self.request.user
+        return obj
+
+    def update(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+
+        old_password = request.data.get('old_password')
+        if old_password:
+            user = self.request.user
+            if not user.check_password(old_password):
+                raise ValidationError({'message': 'پسورد قدیمی درست نیست.', 'status': 400})
+            password = request.data.get('password')
+            password2 = request.data.get('password2')
+            if password == password2 == old_password:
+                raise ValidationError({"message": "پسورد مشابه قبلی است.", 'status': 400})
+            elif password == password2:
+                user.set_password(password)
+                user.save()
+            else:
+                raise ValidationError({"message": "پسوردها یکی نیستند.", 'status': 400})
+        else:
+            raise ValidationError({"message": "پسورد قدیمی را وارد کنید.", 'status': 400})
+        if serializer.is_valid():
+            return Response(serializer.data)
 
 class ListPostViewSet(viewsets.ModelViewSet):
     '''

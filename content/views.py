@@ -52,7 +52,7 @@ class PostViewSet(viewsets.ModelViewSet):
         param = self.request.GET.get('route')
         if param:
             user = UserAccount.objects.filter(name=param).first()
-            queryset = Post.objects.filter(user=user.id)
+            queryset = Post.objects.filter(user=user.id).order_by('-created_time')
             return queryset
         else:
             return Post.objects.order_by('-created_time')
@@ -157,23 +157,6 @@ class CommentViewSet(viewsets.ModelViewSet):
         '''
             delete comment
         '''
-        post = Post.objects.filter(id=self.kwargs['pk']).first()
-        log_in = UserAccount.objects.get(username=request.user)
-
-        comment = Comment.objects.filter(user=log_in, post=post).first()
-
-        if comment:
-            comment.delete()
-            content = {'message': 'پاک شد.', 'status': 200}
-            return Response(content,status=status.HTTP_200_OK)
-        else:
-            content = {'message': 'همچین کامنتی وجود ندارد.', 'status': 400}
-            return Response(content, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-
         comment = Comment.objects.filter(id=self.kwargs['pk']).first()
         if comment:
             log_in = UserAccount.objects.get(username=request.user)
