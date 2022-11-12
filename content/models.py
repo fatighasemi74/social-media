@@ -1,8 +1,7 @@
 from django.db import models
-from django.core.validators import FileExtensionValidator
 
 
-from account.models import UserAccount
+from account.models import UserAccount, Data
 from django.contrib.auth.models import User
 
 class BaseModel(models.Model):
@@ -12,11 +11,15 @@ class BaseModel(models.Model):
     class Meta:
         abstract = True
 
+
+
+
 class Post(BaseModel):
      caption = models.TextField(blank=True, null=True, max_length=1000)
      user = models.ForeignKey(UserAccount, related_name='posts', on_delete=models.CASCADE)
      title = models.CharField(max_length=80, default='', blank=True, null=True)
-     image = models.ImageField(upload_to='content/media', default='/data/account/media/defaultpost.jpeg', blank=True, validators=[FileExtensionValidator(allowed_extensions=['jpg', 'png', 'jpeg'])])
+     media_id = models.ManyToManyField(Data, related_name='postmedias', blank=True)
+
 
      class Meta:
          verbose_name = 'post'
@@ -26,24 +29,6 @@ class Post(BaseModel):
         return "{} ({})".format(self.user.username, self.id)
 
 
-# class Media(BaseModel):
-#     IMAGE = 1
-#     VIDEO = 2
-#
-#     TYPE_CHOICES = (
-#         (IMAGE, "Image"),
-#         (VIDEO, "Video"),
-#     )
-#     media_type = models.PositiveSmallIntegerField(choices=TYPE_CHOICES, default=IMAGE )
-#     post = models.ForeignKey(Post, related_name='media', on_delete=models.CASCADE)
-#     media_file = models.FileField(upload_to='content/media',null=True, blank=True, validators=[FileExtensionValidator(allowed_extensions=('jpg', 'jpeg', 'mp4', 'wmv', 'flv', 'png'))])
-#
-#     class Meta:
-#         verbose_name = "Media"
-#         verbose_name_plural = "Medias"
-#
-#     def __str__(self):
-#         return '{}'.format(str(self.post))
 
 class Comment(BaseModel):
     caption = models.TextField()

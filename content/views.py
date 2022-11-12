@@ -3,6 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import viewsets
 from rest_framework import pagination
+from rest_framework.exceptions import ValidationError
 from django.http import QueryDict
 
 from content.models import Post, Comment, Like
@@ -52,8 +53,11 @@ class PostViewSet(viewsets.ModelViewSet):
         param = self.request.GET.get('route')
         if param:
             user = UserAccount.objects.filter(name=param).first()
-            queryset = Post.objects.filter(user=user.id).order_by('-created_time')
-            return queryset
+            if user:
+                queryset = Post.objects.filter(user=user.id).order_by('-created_time')
+                return queryset
+            else:
+                raise ValidationError({'message': 'کاربر وجود ندارد.', 'status': 400})
         else:
             return Post.objects.order_by('-created_time')
             # return qs
@@ -64,22 +68,26 @@ class PostViewSet(viewsets.ModelViewSet):
         '''
         log_in = UserAccount.objects.get(name=self.request.user)
         post = Post.objects.filter(id=kwargs['pk']).first()
-        if post.user == log_in:
-            instance = self.get_object()
-            if request.data.get('caption'):
-                instance.caption = request.data.get('caption')
-                instance.save()
-            if request.data.get('title'):
-                instance.title = request.data.get('title')
-                instance.save()
-            if request.data.get('image'):
-                instance.image = request.data.get('image')
-                instance.save()
-            serializer = PostSerializer(instance, context={'request': request})
-            return Response(serializer.data)
+        if post:
+            if post.user == log_in:
+                instance = self.get_object()
+                if request.data.get('caption'):
+                    instance.caption = request.data.get('caption')
+                    instance.save()
+                if request.data.get('title'):
+                    instance.title = request.data.get('title')
+                    instance.save()
+                if request.data.get('image'):
+                    instance.image = request.data.get('image')
+                    instance.save()
+                serializer = PostSerializer(instance, context={'request': request})
+                return Response(serializer.data)
+            else:
+                content = {'message': 'اجازه ی ادیت کردن ندارید.', 'status': 403}
+                return Response(content,status=status.HTTP_403_FORBIDDEN)
         else:
-            content = {'message': 'اجازه ی ادیت کردن ندارید.', 'status': 403}
-            return Response(content,status=status.HTTP_403_FORBIDDEN)
+            content = {'message': 'همجین پستی وجود ندارد.', 'status': 403}
+            return Response(content, status=status.HTTP_403_FORBIDDEN)
 
     def destroy(self, request, *args, **kwargs):
         '''
@@ -87,13 +95,16 @@ class PostViewSet(viewsets.ModelViewSet):
         '''
         log_in = UserAccount.objects.get(name=self.request.user)
         post = Post.objects.filter(id=kwargs['pk']).first()
-        print(post.user.id)
-        if post.user == log_in:
-            post.delete()
-            content = {"message": 'پاک شد.', 'status': 200}
-            return Response(content,status=status.HTTP_200_OK)
+        if post:
+            if post.user == log_in:
+                post.delete()
+                content = {"message": 'پاک شد.', 'status': 200}
+                return Response(content,status=status.HTTP_200_OK)
+            else:
+                content = {"message": "اجازه ی پاک کردن ندارید.", 'status': 403}
+                return Response(content, status=status.HTTP_403_FORBIDDEN)
         else:
-            content = {"message": "اجازه ی پاک کردن ندارید.", 'status': 403}
+            content = {'message': 'همجین پستی وجود ندارد.', 'status': 403}
             return Response(content, status=status.HTTP_403_FORBIDDEN)
 
 class CommentCreateAPIView(generics.CreateAPIView):
@@ -129,9 +140,11 @@ class CommentViewSet(viewsets.ModelViewSet):
         param = self.request.GET.get('route')
         if param:
             post = Post.objects.filter(id=param).first()
-            queryset = Comment.objects.filter(post=post.id)
-            print(queryset)
-            return queryset
+            if post:
+                queryset = Comment.objects.filter(post=post.id)
+                return queryset
+            else:
+                raise ValidationError({'message': 'همجین پستی وجود ندارد', 'status': 400})
         else:
             return qs
 
@@ -142,16 +155,20 @@ class CommentViewSet(viewsets.ModelViewSet):
         '''
         log_in = UserAccount.objects.get(name=self.request.user)
         comment = Comment.objects.filter(id=kwargs['pk']).first()
-        if comment.user == log_in:
-            instance = self.get_object()
-            if request.data.get('caption'):
-                instance.caption = request.data.get('caption')
-                instance.save()
-            serializer = CommentSerializer(instance)
-            return Response(serializer.data)
+        if comment:
+            if comment.user == log_in:
+                instance = self.get_object()
+                if request.data.get('caption'):
+                    instance.caption = request.data.get('caption')
+                    instance.save()
+                serializer = CommentSerializer(instance)
+                return Response(serializer.data)
+            else:
+                content = {'message': 'اجازه ی ادیت کردن ندارید.', 'status': 403}
+                return Response(content,status=status.HTTP_403_FORBIDDEN)
         else:
-            content = {'message': 'اجازه ی ادیت کردن ندارید.', 'status': 403}
-            return Response(content,status=status.HTTP_403_FORBIDDEN)
+            content = {'message': 'کامنت وجود ندارد', 'status': 403}
+            return Response(content, status=status.HTTP_403_FORBIDDEN)
 
     def destroy(self, request, pk, *args, **kwargs):
         '''
@@ -196,6 +213,7 @@ class LikeViewSet(viewsets.ModelViewSet):
     pagination_class = Pagination
     lookup_field = 'pk'
 
+
     def get_queryset(self, *args, **kwargs):
         '''
             list of post likes
@@ -204,8 +222,11 @@ class LikeViewSet(viewsets.ModelViewSet):
         param = self.request.GET.get('route')
         if param:
             post = Post.objects.filter(id=param).first()
-            queryset = Like.objects.filter(post=post.id)
-            return queryset
+            if post:
+                queryset = Like.objects.filter(post=post.id)
+                return queryset
+            else:
+                raise ValidationError({'message': 'همجین پستی وجود ندارد', 'status': 400})
         else:
             return qs
 

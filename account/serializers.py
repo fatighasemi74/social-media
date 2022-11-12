@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 
 
 
-from .models import UserAccount, Relation
+from .models import UserAccount, Relation, Data
 
 
 
@@ -17,9 +17,6 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         token['username'] = user.username
         return token
-
-
-
 
 
 class UserAccountCreateSerializer(serializers.ModelSerializer):
@@ -42,12 +39,17 @@ class UserAccountCreateSerializer(serializers.ModelSerializer):
             raise ValidationError({'message': 'نام کاربری خالی ست.', 'status': 400})
         return attr
 
-
-    def clean(self):
-        email = self.cleaned_data.get('email')
-        if User.objects.filter(email=email).exists():
+    def validate_email(self, attr):
+        if attr == "":
+            raise ValidationError({'message': 'ایمیل خالی ست.', 'status': 400})
+        elif User.objects.filter(email=attr).exists():
             raise ValidationError({'message': 'ایمیل وجود ندارد.', 'status': 400})
-        return self.cleaned_data
+        return attr
+    # def clean(self):
+    #     email = self.cleaned_data.get('email')
+    #     if User.objects.filter(email=email).exists():
+    #         raise ValidationError({'message': 'ایمیل وجود ندارد.', 'status': 400})
+    #     return self.cleaned_data
 
     def validate(self, attr):
         if attr['password'] != attr['password2']:
@@ -179,3 +181,8 @@ class FollowerListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Relation
         fields = ('from_user', 'image')
+
+class DataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Data
+        fields = ('id', 'media_file', 'media_type', 'content_id')

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import FileExtensionValidator
 
 
 class BaseModel(models.Model):
@@ -9,6 +10,41 @@ class BaseModel(models.Model):
     class Meta:
         abstract = True
 
+#
+# class Medias(BaseModel):
+
+#     #
+    TYPE_CHOICES = (
+        (0, "ProfilePicture"),
+        (1, "PostImage"),
+    )
+#     media_type = models.CharField(max_length=30)
+#     media_file = models.FileField(upload_to='content/media', default=1, null=True, blank=True, validators=[FileExtensionValidator(allowed_extensions=('jpg', 'jpeg', 'mp4', 'wmv', 'flv', 'png'))])
+#     content_id = models.IntegerField()
+#
+#     class Meta:
+#         verbose_name = "Media"
+#         verbose_name_plural = "Medias"
+
+    # def __str__(self):
+    #     return '{}'.format(str(self.user))
+
+class Data(BaseModel):
+    TYPE_CHOICES = (
+        (0, "ProfilePicture"),
+        (1, "PostImage"),
+    )
+    media_type = models.IntegerField(choices=TYPE_CHOICES)
+    media_file = models.FileField(upload_to='data/content/media', validators=[FileExtensionValidator(allowed_extensions=('jpg', 'jpeg', 'mp4', 'wmv', 'flv', 'png'))])
+    content_id = models.IntegerField()
+
+    class Meta:
+        verbose_name = "Data"
+        verbose_name_plural = "Datas"
+
+    def __str__(self):
+        return '{} >> {}'.format(self.media_type, self.content_id)
+
 class UserAccount(models.Model):
     username = models.OneToOneField(User, on_delete=models.CASCADE, null=True, related_name='user_account')
     name = models.CharField(max_length=200, null=True, blank=True)
@@ -17,9 +53,7 @@ class UserAccount(models.Model):
     email = models.EmailField(max_length=254, unique=True, null=True, blank=True)
     birth_date = models.DateField(null=True, blank=True)
     allowed = models.BooleanField(default=False)
-
-
-
+    media_id = models.ForeignKey(Data, related_name='userdatas', null=True, blank=True, on_delete=models.CASCADE)
     class Meta:
         verbose_name = 'userAccount'
         verbose_name_plural = 'userAccounts'

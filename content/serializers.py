@@ -34,7 +34,6 @@ class PostCreateSerializer(serializers.ModelSerializer):
             validation method for caption length
         '''
         if attr == "":
-            content = {'message': 'کپشن خالی ست.', 'status': 400}
             raise ValidationError({'message': 'کپشن خالی ست.', 'status': 400})
         return attr
     # def create(self, validated_data):
@@ -88,15 +87,32 @@ class CommentCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('id' ,'caption', 'post', 'reply_to', 'username', 'user_image')
+        extra_kwargs = {
+            'caption': {
+                'validators': []
+            }
+        }
 
 
     def validate_caption(self, attr):
         '''
             validation method for caption length
         '''
-        if len(attr) > 30:
-            raise ValidationError("Caption cannot be more than 30 characters!!")
+        if attr == "":
+            raise ValidationError({'message': 'کپشن خالی ست.', 'status': 400})
+        elif len(attr) > 30:
+            raise ValidationError({'message': 'کپشن طولانی ست.', 'status': 400})
         return attr
+
+    def validate_post(self, attr):
+        '''
+            validation method for caption length
+        '''
+        if attr == "":
+            raise ValidationError({'message': 'کپشن خالی ست.', 'status': 400})
+
+        return attr
+
     def validators_reply_to(self, attr):
         '''
             validation method for reply
@@ -132,8 +148,17 @@ class LikeCreateSerializer(serializers.ModelSerializer):
         model = Like
         fields = ['post']
 
+    def validate_post(self, attr):
+        '''
+            validation method for caption length
+        '''
+        if attr == "":
+            raise ValidationError({'message': 'کپشن خالی ست.', 'status': 400})
+
+        return attr
+
 class LikeSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username')
     class Meta:
         model = Like
-        fields = ('id', 'username')
+        fields = ('id', 'username', 'post')

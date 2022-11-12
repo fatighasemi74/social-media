@@ -6,13 +6,15 @@ from rest_framework import routers
 from .views import UserCreateAPIView, LogoutView, \
     LoginView, ProfileViewSet, RefreshTokenAPIView,\
      VerificationView, RelationViewSet, \
-    FollowerAPIView, FollowingAPIView, ListPostViewSet, ChangePasswordView
+    FollowerAPIView, FollowingAPIView, ListPostViewSet, ChangePasswordView, \
+    DataViewSet
 
 
 router = routers.SimpleRouter()
 router.register('profile', ProfileViewSet, basename='profile')
 router.register('relation', RelationViewSet, basename='relation')
 router.register('list', ListPostViewSet, basename='list')
+router.register('data', DataViewSet, basename='data')
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -25,5 +27,6 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('activate/<str:username>/', VerificationView.as_view(), name='activate'),
     path('change-password/', ChangePasswordView.as_view(), name='change-password'),
+    # path('data/', DataAPIView.as_view(), name='data'),
 
 ]

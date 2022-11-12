@@ -23,10 +23,10 @@ from content.models import Post
 from content.serializers import PostSerializer
 from content.views import Pagination
 
-from .models import UserAccount, Relation
+from .models import UserAccount, Relation, Data
 from .serializers import UserAccountCreateSerializer, MyTokenObtainPairSerializer,\
     ProfileSerializer, CreateOrDeleteRelationSerializer, FollowingListSerializer, \
-    FollowerListSerializer, ChangePasswordSerializer
+    FollowerListSerializer, ChangePasswordSerializer, DataSerializer
 
 
 # new functions:
@@ -53,6 +53,7 @@ class RefreshTokenAPIView(APIView):
         refresh = self.request.COOKIES.get('refresh_token')
         print('refresh', refresh)
         decode = jwt.decode(refresh, settings.SECRET_KEY, algorithms='HS256')
+        print(decode, 'decodeeeeeeeee')
         user_id = decode['user_id']
         username = decode['username']
         user = User.objects.filter(id=user_id).first()
@@ -389,4 +390,20 @@ class FollowerAPIView(generics.ListAPIView):
         qs = Relation.objects.filter(to_user=user.id)
         return qs.filter(to_user=user.id)
 
+class DataViewSet(viewsets.ModelViewSet):
+    serializer_class = DataSerializer
+    permission_classes = (IsAuthenticated, )
+    queryset = Data.objects.all()
+    pagination_class = Pagination
+    lookup_field = 'pk'
+
+    def get_queryset(self):
+        '''
+            open photo
+        '''
+        qs = super().get_queryset()
+        return qs
+
+    # def post(self, request, *args, **kwargs):
+    #     print(request.data['media_file'])
 
