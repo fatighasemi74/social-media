@@ -3,6 +3,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.models import User
 
+from rest_framework.validators import UniqueForYearValidator
 
 
 from .models import UserAccount, Relation, Data
@@ -29,22 +30,29 @@ class UserAccountCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserAccount
         fields = ('name', 'password','password2', 'email')
-        extra_kwargs = {'password': {'write_only': True}, 'password2': {'write_only': True}}
+        extra_kwargs = {
+            'password':
+                {'write_only': True},
+            'password2':
+                {'write_only': True},
+        }
 
-    def validate_name(self, attr):
-        '''
-            validation method for username
-        '''
-        if attr == "":
-            raise ValidationError({'message': 'نام کاربری خالی ست.', 'status': 400})
-        return attr
 
-    def validate_email(self, attr):
-        if attr == "":
-            raise ValidationError({'message': 'ایمیل خالی ست.', 'status': 400})
-        elif User.objects.filter(email=attr).exists():
-            raise ValidationError({'message': 'ایمیل وجود ندارد.', 'status': 400})
-        return attr
+    # def validate_name(self, attr):
+    #     '''
+    #         validation method for username
+    #     '''
+    #     if attr == "":
+    #         raise ValidationError({'message': 'نام کاربری خالی ست.', 'status': 400})
+    #     return attr
+    #
+    # def validate_email(self, attr):
+    #     print(attr)
+    #     if attr == "":
+    #         raise ValidationError({'message': 'ایمیل خالی ست.', 'status': 400})
+    #     elif User.objects.filter(email=attr).exists():
+    #         raise ValidationError({'message': 'ایمیل وجود ندارد.', 'status': 400})
+    #     return attr
     # def clean(self):
     #     email = self.cleaned_data.get('email')
     #     if User.objects.filter(email=email).exists():
@@ -52,10 +60,25 @@ class UserAccountCreateSerializer(serializers.ModelSerializer):
     #     return self.cleaned_data
 
     def validate(self, attr):
+        '''
+            email validation
+        '''
+        if attr['email'] == "":
+            raise ValidationError({'message': 'ایمیل خالی ست.', 'status': 400})
+        elif User.objects.filter(email=attr).exists():
+            raise ValidationError({'message': 'ایمیل وجود ندارد.', 'status': 400})
+        '''
+            password validation
+        '''
         if attr['password'] != attr['password2']:
             raise ValidationError({'message': "پسورد مطابقت ندارد.", 'status': 400})
         if len(attr['password']) < 7:
             raise ValidationError({'message' : "پسورد باید حداقل ۷ کاراکتر داشته باشد.", 'status': 400})
+        '''
+            name validation
+        '''
+        if attr['name'] == "":
+            raise ValidationError({'message': 'نام کاربری خالی ست.', 'status': 400})
         return attr
 
 

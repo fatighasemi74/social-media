@@ -188,7 +188,7 @@ EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'marzyra@binjhom.ir'
-EMAIL_HOST_PASSWORD = 'zwz+49hICi$F'
+EMAIL_HOST_PASSWORD = '[,Q^&e=pJ?eq'
 
 
 # Default primary key field type
